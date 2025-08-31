@@ -1,0 +1,302 @@
+\newpage
+\section{Gateway module software}
+
+The gateway module is the most important part of this project as it interfaces with
+the car and is resposible for the entire system's power management. The module receives
+and parses VAN frames, organizes the data and then forwards it to the infotainment computer.
+It also does the reverse. It can receive data from the infotainment computer and transmit the
+appropriate VAN frame on the bus. The power management is also an important part of the software,
+as excessive idle power draw will drain the car's battery fairly quickly.
+
+\subsection{Framework and approach}
+
+For the software, we are using the ESP-IDF framework from Espressif. The framework is based on
+the FreeRTOS Operating System. Due to the nature of the OS and the software environment, the module
+software was written with an event-based approach.
+
+\bigskip
+\noindent
+We use the following events as a base for the main loops/tasks:
+\begin{itemize}
+  \item Receiving VAN frames
+  \item Receiving UART data from the computer
+  \item Car state change
+  \item Timer events
+  \item Main task
+\end{itemize}
+
+\noindent
+Since the ESP32 has two cores, we delegated one core to exclusively handle receiving and parsing VAN frames,
+since they are very frequent and we don't want to miss any.
+
+\subsection{Receiving VAN frames}
+
+To receive VAN frames we have to manually read and time the RX pin states. Luckily, the ESP32
+has a hardware peripheral that does just that: the RMT peripheral. It can monitor GPIO pin states
+and also measure how long it stayed in that state. Once we set the thresholds for the minimum and maximum
+signal lengths we can have the peripheral trigger an interrupt every time it sees an \textbf{EOF} sequence.
+\begin{listing}[H]
+  \begin{minted}{C}
+  rmt_rx_channel_config_t rx_chan_config = {0};
+  
+  ...
+  
+  timeslot_interval_ns = 8 * 1000; // At 125 kTS/s
+  
+  // EOF is 10 TS long
+  rx_recv_config.signal_range_max_ns = 10 * timeslot_interval_ns;
+  rx_recv_config.signal_range_min_ns = timeslot_interval_ns / 2;
+  
+  ...
+  \end{minted}
+  \caption{RMT timing initialization}
+\end{listing}
+
+\noindent
+Once the \textbf{EOF} sequence is found, the RMT peripheral driver triggers an interrupt. Inside that interrupt,
+we put a new event in the VAN Receiver task queue and restart the peripheral. The VAN Receiver task takes the
+received RMT data from its queue and parses it. The data is an array of structs whose defition can be found in
+Listing \ref{lst:rmt_symbol_word_t}. We reconstruct the VAN frame bit by bit from that array, taking into account
+the Manchester bits. After checking the checksum, we separate the identifier and data, put it in a new buffer and
+post it to the queue of the Main task for further processing.
+
+\begin{listing}[H]
+  \begin{minted}{C}
+/**
+ * @brief The layout of RMT symbol stored in memory, which is decided by the hardware design
+ */
+typedef union {
+    struct {
+        uint16_t duration0 : 15; /*!< Duration of level0 */
+        uint16_t level0 : 1;     /*!< Level of the first part */
+        uint16_t duration1 : 15; /*!< Duration of level1 */
+        uint16_t level1 : 1;     /*!< Level of the second part */
+    };
+    uint32_t val; /*!< Equivalent unsigned value for the RMT symbol */
+} rmt_symbol_word_t;
+  \end{minted}
+  \caption{Definiton of the RMT data symbol in ESP-IDF}
+  \label{lst:rmt_symbol_word_t}
+\end{listing}
+
+\subsection{Parsing VAN frames}
+
+Once the VAN receiver task posts a new event, the Main task then calls the packet parser which checks
+the identifier and, if it's recognized, parses the data into global buffers and posts appropriate events
+to the Main queue depending on the packet being parsed. See listing \ref{lst:example-van-frame} for an
+example VAN frame struct.
+
+\begin{listing}[H]
+  \begin{minted}{C}
+/**
+ * @brief VAN rpm and speed data struct. Iden 0x824
+ *
+ */
+struct psa_van_rpm_speed_struct
+{
+    uint16_t rpm;           // RPM in big endian. Divide by 8 to get actual rpm;
+    uint16_t speed;         // Speed in big endian. Divide by 100 to get actual speed;
+    uint16_t distance;      // Distance covered. Increments with each passed decimeter
+    uint8_t packet_changed; // Increments each time information significantly changes
+} __attribute__((packed));
+  \end{minted}
+  \caption{Example VAN frame struct.}
+  \label{lst:example-van-frame}
+\end{listing}
+
+\subsection{Sending VAN frames}
+
+We use the TSS463C to send VAN frames to the car. The TSS is effectively additional 128 bytes of RAM
+that we have to manage, since we have to manage all the memory used for sending and receiving data.
+For now, the TSS is only used to send CD Changer packets so we can emulate it, and to send trip reset
+requests. The CD Changer messages are immediate reply messages (see \ref{subsec:message-types}), and the
+trip reset is a normal frame with an ACK request. The CD Changer packets are on a timer and sent every
+second, otherwise the onboard radio will think the CD Changer is absent and disable it.
+
+\noindent
+The TSS communicates over SPI and is a bit cumbersome to use, so a custom driver was written to make it easier to use. Additionally,
+there is a seperate task that monitors the TSS message states and queues them to be sent.
+
+\subsection{UART communication}
+
+The infotainment computer communicates with the ESP32 over UART. The reason we use UART is its simplicity of use.
+The ESP mostly sends data to the computer, but can also receive requests from the computer.
+
+\noindent
+The uart code lives in its own task that receives events from other tasks and can also send events to the main task.
+When the Main loop sees a change to the global data buffers (a VAN frame arrived, battery voltage changed, etc\dots)
+it posts an appropriate event to the uart task with the data to send to the computer. The protocol and data structs
+are custom and inspired by the MSP protocol used in Flight Controller firmware on FPV drones.
+
+\subsection{Event handling and tasks}
+
+The firmware uses several tasks that run as their own loops and wait for events from multiple queues. There are a total
+of 4 global queues in the firmware, one for each major component:
+\begin{itemize}
+  \item Main Queue - Read by the Main task. All other tasks post their events to the Main task queue.
+        The Main task then determines what to do and where to forward that event next.
+  \item TSS Queue - Read by the TSS task. Used to queue packets for transmission by the TSS.
+  \item UART Queue - Read by the UART task. Used to send packets to the Infotainment computer.
+  \item VAN Queue (Unused) - Read by the VAN RMT task. Left for future use.
+\end{itemize}
+
+\noindent
+Additionally, there is an internal queue in the VAN RMT task. This queue is used exclusively between the RMT
+peripheral's interrupt and the VAN RMT task.
+
+\bigskip
+\noindent
+The events are defined as a struct (Listing \ref{lst:mive_global_event}) with the event identifier
+(Listing \ref{lst:enum-mive_global_event_t}) and a pointer to some data. The data depends on the
+event being received.
+
+\subsection{Handling power states}
+
+It is important we manage the system's power consumption. To make that easier, we have defined
+several `car states'. See table \ref{tbl:car-states} for a list of those states, and the systems
+behaviour. One important component mentioned in that table is ESP32's deep sleep mode. When placed
+in deep sleep, the ESP is practically turned off. The only thing running on the chip is a special
+section of RAM, the RTC peripheral and, if needed, the ULP coprocessor. For our usecase, we use the
+same ADC pin we use for battery voltage measurement to wake up the ESP. Due to the voltage ranges
+of the pin, we can't use simple GPIO wake up, but must use the ULP coprocessor to measure voltage
+and wake the ESP up when it increases past a certain threshold.
+
+\subsection{The ULP coprocessor}
+
+The ESP32 has a very low power coprocessor onboard. It has a very simple architecture and uses very little
+power. It is ideal to use for ADC measurement and waking up the ESP. It cannot be programmed directly in C,
+but has two other ways of writing code. The first one is writing the assembly code in a seperate file and
+building it into the firmware binary. The other one is using predefined C macros and writing the program
+in an array inside the C program and loading it that way. We opted to use the second option as it's
+way simpler to use. See Listing \ref{lst:ulp-deep-sleep} for the ULP code used in deep sleep.
+
+\begin{table}[H]
+  \begin{tabularx}{\textwidth} { 
+  | >{\raggedright\arraybackslash}X 
+  | >{\raggedright\arraybackslash}X 
+  | >{\raggedright\arraybackslash}X | }
+    \hline
+    \textbf{Description} & \textbf{Computer state} & \textbf{ESP32 state} \\
+    \hline
+    \hline
+    Car in sleep mode (switched 12V rail is off) & Turned Off (no power) & Deep sleep \\
+    \hline
+    Car off and locked, not in sleep mode & Turned Off & Running \\
+    \hline
+    Car off, not locked, not in sleep mode & If coming from states above, turned off, otherwise display off & Running \\
+    \hline
+    Car off, radio turned on & Turned on, display on & Running \\
+    \hline
+    Car off, key in ACC & Turned on, display on & Running \\
+    \hline
+    Car off, key in IGN & Turned on, display on & Running \\
+    \hline
+    Car cranking & Turned on, display off & Running \\
+    \hline
+    Engine running & Turned on, display on & Running \\
+    \hline
+  \end{tabularx}
+  \caption{Car state table}
+  \label{tbl:car-states}
+\end{table}
+
+\begin{listing}[H]
+  \begin{minted}{C}
+struct mive_global_event
+{
+    enum mive_global_event_t event;
+    void* ev_data;
+};
+  \end{minted}
+  \caption{Event struct definition}
+  \label{lst:mive_global_event}
+\end{listing}
+
+\begin{listing}[H]
+  \begin{minted}{C}
+enum mive_global_event_t
+{
+    MIVE_EVENT_NONE = 0,
+    MIVE_EVENT_GLOBAL_SLEEP,
+    MIVE_EVENT_RMT_NEW_VAN_FRAME,
+    MIVE_EVENT_TSS_RESET,
+    MIVE_EVENT_TSS_ACTIVATE,
+    MIVE_EVENT_TSS_IDLE,
+    MIVE_EVENT_TSS_SLEEP,
+    MIVE_EVENT_TSS_WRITE_FRAME,
+    MIVE_EVENT_TSS_MONITOR_CHANNEL,
+
+    MIVE_EVENT_VAN_UPDATE_AUDIO_MENU,
+    MIVE_EVENT_VAN_NEXT_AUDIO_MENU_ITEM,
+    MIVE_EVENT_VAN_CLOSE_AUDIO_MENU,
+
+    MIVE_EVENT_UART_NEW_DATA, // New VAN Data to send
+    MIVE_EVENT_UART_RECEIVE, // Received data from UART
+    MIVE_EVENT_UART_SEND, // Send data to UART
+
+    MIVE_EVENT_TIMER_UART_SEND,
+    MIVE_EVENT_TIMER_1MS,
+    MIVE_EVENT_TIMER_1S,
+
+    MIVE_EVENT_ADC,
+    MIVE_EVENT_STATE_CHANGE,
+    MIVE_EVENT_POWER,
+};
+  \end{minted}
+  \caption{List of some events present in the firmware}
+  \label{lst:enum-mive_global_event_t}
+\end{listing}
+
+\begin{listing}[H]
+  \begin{minted}{C}
+const ulp_insn_t program[] = {
+    I_MOVI(R0, 0),                // Set reg. R0 to initial 0
+    I_MOVI(R2, 0),                // Set reg. R2 to initial 0
+    M_LABEL(1),                   // LABEL 1 - Start of measurement
+    I_ADDI(R0, R0, 1),            // Increment cycle counter (reg. R0)
+    I_ADC(R1, PSA_ADC_UNIT, PSA_ADC_CHANNEL),            // Read ADC value to R1
+    I_ADDR(R2, R2, R1),           // Add ADC value from R1 to R2
+    M_BL(1, 4),                   // If cycle counter is less than 4, go to LABEL 1
+    I_RSHI(R0, R2, 2),            // Divide accumulated ADC value in R2 by 4 and save it to R0
+    M_BGE(2, high_adc_treshold),  // If average ADC value from reg. 
+                                  // R0 is higher or equal than high_adc_treshold, go to LABEL 2
+    I_HALT(),                     // Halt the coprocessor, it will be woken up by the timer again
+    M_LABEL(2),                   // LABEL 2
+    I_WAKE(),                     // Wake up ESP32
+    I_END(),                      // Stop ULP program timer
+    I_HALT(),                     // Halt the coprocessor
+};
+
+size_t size = sizeof(program)/sizeof(ulp_insn_t);
+ESP_ERROR_CHECK(ulp_process_macros_and_load(0, program, &size));
+ulp_set_wakeup_period(0, 20000); // ULP wakeup timer
+err = ulp_run(0);
+  \end{minted}
+  \caption{ULP code that runs in deep sleep.}
+  \label{lst:ulp-deep-sleep}
+\end{listing}
+
+\begin{listing}[H]
+  \begin{minted}{C}
+int ret = xQueueReceive(main_queue, &event, pdMS_TO_TICKS(1000));
+
+if(ret == pdPASS)
+{
+    switch (event.event)
+    {
+    case MIVE_EVENT_RMT_NEW_VAN_FRAME:
+        van_packet = (mive_van_packet_t*)event.ev_data;
+
+        ret = psa_parse_van_packet(
+            van_packet->iden,
+            van_packet->packet_size,
+            van_packet->packet,
+            &global_libpsa_buffers);
+        
+        ...
+        break;
+    }
+}
+  \end{minted}
+  \caption{Example event handling}
+\end{listing}

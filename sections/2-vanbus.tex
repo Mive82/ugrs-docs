@@ -1,0 +1,153 @@
+\newpage
+\section{VAN Bus}\label{sec:van_bus}
+
+VAN (Vehicle Area Network) is a serial communication bus developed by the PSA group (Peugeot, Citroën) and Renault as an altenative to
+the CAN bus. It's defined in the ISO standard \textbf{ISO 11519-3}. It utilizes the same physical layer as the CAN bus (a differential pair) and identical
+bus arbitration method, but it differs in the way the data is packaged.
+
+\bigskip
+\noindent
+Like CAN, the VAN protocol uses identifiers to differentiate between messages and perform bus arbitration. Additionally, it also
+has the ability for so called "In-frame" responses, bigger message sizes (28 bytes instead of 8 bytes in CAN) and the
+ability to directly communicate with another device.
+
+\bigskip
+\noindent
+Data on the VAN network is packed into frames. Frames consist of multiple parts: Start of frame (\textbf{SOF}),
+message identifier (\textbf{IDEN}), command (\textbf{COM}), message data (\textbf{DATA}), frame checksum (\textbf{FCS}),
+end of data signal (\textbf{EOD}), acknowledge signal (\textbf{ACK}) and the end of frame signal (\textbf{EOF}).
+
+\begin{table}[H]
+    \centering
+    \fontsize{10}{10}
+    \selectfont
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        \multirow{2}{*}{\makecell{SOF             \\ 10 TS}}  & \multirow{2}{*}{\makecell{IDEN \\ 12 bit \\ 15 TS}} & \multicolumn{4}{c|}{\makecell{Command \\ (4 bit, 5 TS)}} & \multirow{2}{*}{\makecell{DATA max. \\ 28 byte \\ 280 TS}} & \multirow{2}{*}{\makecell{FCS \\ 15 bit \\ 18 TS}} & \multirow{2}{*}{\makecell{EOD \\ 2 TS}} & \multirow{2}{*}{\makecell{ACK \\ 2 TS}} & \multirow{2}{*}{\makecell{EOF \\ 4 TS}} \\[7mm] \cline{3-6}
+         &  & EXT & RAK & R/W & RTR &  &  &  &  & \\
+        \hline
+    \end{tabular}
+    \caption{VAN frame format}
+    \label{fig:van_frame_format}
+\end{table}
+
+\subsection{Enhanced Manchester code}
+
+All VAN frames are coded using Enhanced Manchester coding (e-Manchester).
+With e-Manchester, after sending 3 NRZ bits, the fourth bit is sent as a Manchester bit.
+Sending data this way ensures easier syncronization on the bus. This is a more predictable
+method of bitstuffing as opposed to the CAN bus method.
+
+In Table \ref{fig:van_frame_format} we can see the number of bits for each part of the frame, as well as
+the number of Time Slots (TS). Since a Manchester bit takes two time slots to send, 4 bits in
+a row encoded with e-Manchester takes 3 + 2 Time slots to send.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/mux1-eman.pdf}
+    \caption[]{e-Mancherster encoding}
+    \label{fig:manchester_bits_mux1}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{images/manchester_bits.pdf}
+    \caption{NRZ and Manchester bits.}
+    \label{fig:manchester_bits_tss463_docs}
+\end{figure}
+
+\subsection{Messages}
+
+A device/module connected to the network can be one of three types:
+\begin{itemize}
+  \item The Autonomous module. A bus master. It can send \textbf{SOF} sequences, initiate data
+        transfers and receive messages.
+  \item The Synchronous access module. It cannot send \textbf{SOF} sequences, but can
+        initiate data transfers and receive messages.
+  \item The Slave module. It can only send messages using in-frame responses and can also
+        receive messages.
+\end{itemize}
+
+\begin{figure}
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{images/ranking.pdf}
+    \caption{Module types}
+  \end{center}
+\end{figure}
+
+\noindent
+The VAN protocol supports multiple message types. They are differentiated using the identifier (\textbf{IDEN})
+and command (\textbf{COM}) fields. The identifier is 12 bits long and is followed by the 4 command bits. Due to the
+way the bus arbitration works, a smaller identifier has priority on the bus. While the identifier value is completely
+up to the user, the command bits are strictly defined and determine the message type that will be sent on the bus:
+\begin{itemize}
+    \item EXT - always 1
+    \item RAK - „Request Acknowledge“. If 1, the receipient must acknowledge the message reception. If 0,
+          the ACK signal must not be sent.
+    \item R/W - „Read/Write“. Signals the data direction. If 0, then it's a `write' message, 
+          a device is sending data intended for another device. If 1, then it's a `read' message,
+          and it implies a request for data and expects an answer.
+    \item RTR - „Remote Transmission Request“. If 0, the message contains data. If 1, the message
+          contains no data and an in-frame response request is implied. The combination R/W = 0 and RTR = 1
+          is forbidded on the bus.
+\end{itemize}
+
+\subsubsection{Message types}
+\label{subsec:message-types}
+Here we will list frame types relevant to this project. There are more, but we only use these.
+
+\paragraph{Normal frame}
+
+The simplest frame type. One module sends an entire frame with data, and may or may not request an ACK.
+In the case no ACK is requested, the message is treated as a broadcast message.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/normalframe_ack.pdf}
+    \caption{Normal frame transimssion with ACK}
+    \label{fig:normal_frame_ack}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/normalframe_noack.pdf}
+    \caption{Normal frame transimssion without ACK}
+    \label{fig:normal_frame_noack}
+\end{figure}
+
+\paragraph{Reply Request Frame with Immediate Reply}
+\label{p:immediate-reply}
+
+This is the only frame in which a slave module can transmit data. The only difference on the
+bus is the R/W bit changed state compared to the normal frame.
+The bus master generates the \textbf{SOF}, the initiator generates the identifier and first 3 bits of the command,
+and the ACK signal. The rest (RTR, data and checksum) are generated by the replying module.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/immediate_reply.pdf}
+    \caption{Reply Request Frame with Immediate Reply}
+    \label{fig:immediate_reply_frame}
+\end{figure}
+
+\subsection{VAN network}
+
+We can connect multiple modules together to create a network. We can also connect multiple networks together
+and use a gateway module to route data between networks. In the Peugeot 206 that we are building this project for,
+we have 1 CAN network \emph{CAN Engine} andd 3 VAN networks: \emph{VAN Comfort}, \emph{VAN Body 1} and \emph{VAN Body 2}.
+
+\noindent
+We can see the layout in figure \ref{fig:van_can_network}. From there we also see the gateway module, the BSI.
+This module is present in all PSA group cars. This particular BSI is from the AEE2001 generation, the only generation
+to use the VAN bus. Other generations, the AEE2004 and AEE2010 both exclusively use CAN.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{images/vannetwork.pdf}
+    \caption{VAN and CAN Network layout in the Peugeot 206}
+    \label{fig:van_can_network}
+  \end{center}
+\end{figure}
+
+Our infotainment system will be connected in place of the CD changer, module number 8415 on figure \ref{fig:van_can_network}
+on the \emph{VAN Comfort} bus.

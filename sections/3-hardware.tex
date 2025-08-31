@@ -1,0 +1,143 @@
+\newpage
+
+\section{Gateway module hardware}
+
+The gateway module is designed as a Raspberry Pi HAT board. It has to contain
+necessary hardware for power regulation and car communication. It also has to expose
+all IO for connecting external devices such as an ESP32 programmer and a power cable
+for the Raspberry Pi display.
+
+\subsection{Communication hardware}
+In section \ref{sec:van_bus} we have established that the VAN bus is a differential
+protocol much like the CAN bus and, as a result, we can use readily available CAN
+transciever hardware. However, we still need hardware that can generate valid VAN
+frames. For that we use the Atmel TSS463C VAN driver chip. It is the only VAN driver chip
+that exists. For the CAN transciever we use the MCP2551 because it was proven to work with 
+early prototypes and, with it's 5 volt logic, integrates nicely with the TSS.
+
+\begin{figure}[H]
+    \begin{minipage}{0.48\textwidth}
+        \begin{center}
+            \includegraphics[width=\textwidth]{images/sch_tss.pdf}
+        \end{center}
+    \end{minipage}
+    \hfill\vline\hfill
+    \begin{minipage}{0.48\textwidth}
+        \begin{center}
+            \includegraphics[width=\textwidth]{images/sch_mcp.pdf}
+        \end{center}
+    \end{minipage}
+    \caption{TSS463C and MCP2551 in the schematic}
+\end{figure}
+    
+
+\subsubsection{TSS463C}
+
+The TSS463C is the VAN driver chip we use for sending VAN frames to the car. It is the only
+standalone VAN driver chip that exists, as all other modules inside the car have a VAN driver
+built into their SOCs. The TSS uses SPI to communicate with the ESP32.
+
+\subsection{Voltage levels}
+
+The TSS463C and the MCP2551 both use 5V logic, while all other components on the board, including
+the ESP32, use 3.3V logic. For that we use a pair of NTS0104 level shifters. One of them is used
+for the TSS SPI communication with the ESP, while the other is used for connecting the VAN RX line
+from the MCP to the ESP32 for reading VAN frames, and the TSS interrupt pin.
+
+\subsection{Connecting to the car}
+
+We are connecting to the car in place of the CD Changer unit. The CD Changer connects to
+the original RD3 Headunit in the C3 (pins 13 to 20) portion of the ISO 10487 radio connector.
+See Figure \ref{fig:iso-conn-pinout} for the pinout.
+
+\bigskip
+\noindent
+Pins 13 to 17 for data and power are connected to the gateway module with a JST GH 6 pin connector,
+while pins 18 to 20 are wired to a 3.5mm audio cable and connected to the Raspberry Pi. Since the
+naming convention is different between Figures \ref{fig:iso-conn-pinout} and \ref{fig:jst-van-pinout},
+see
+
+\begin{minipage}{0.45\textwidth}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=\textwidth]{images/ISO-conn.pdf}
+            \caption{ISO connector pinout}
+            \label{fig:iso-conn-pinout}
+        \end{center}
+    \end{figure}    
+\end{minipage}
+\hfill\vline\hfill
+\begin{minipage}{0.45\textwidth}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=\textwidth]{images/sch-jst-van.pdf}
+            \caption{JST Connector in the schematic}
+            \label{fig:jst-van-pinout}
+        \end{center}
+    \end{figure}  
+\end{minipage}
+
+\begin{table}[H]
+    \begin{center}
+        \begin{tabular}{|r c l|}
+            \hline
+            \texttt{VAN DATA} & $\Leftrightarrow$ & \texttt{VAN\_L} \\
+            \hline
+            \texttt{VAN DATA/} & $\Leftrightarrow$ & \texttt{VAN\_H} \\
+            \hline
+            \texttt{CD A/C GND} & $\Leftrightarrow$ & \texttt{GND} \\
+            \hline
+            \texttt{CD A/C B/U} & $\Leftrightarrow$ & \texttt{+12V Car Battery} \\
+            \hline
+            \texttt{+VAN} & $\Leftrightarrow$ & \texttt{+12V Ignition} \\
+            \hline
+        \end{tabular}
+    \end{center}
+    \caption{ISO to JST connection legend}
+\end{table}
+
+\subsection{ESP32 Flashing}
+
+Flashing firmware on the ESP32 is done using UART. In order to flash the firmware, the
+ESP must first be put into flashing mode. This can be done by pulling pins \texttt{GPIO00}
+and \texttt{GPIO02} low when powering on the board. This can be achived in two ways
+on our board: Manually by pressing the \texttt{BOOT} momentary button while resetting the
+board with the \texttt{EN} button, or by connecting the \texttt{DTR} and \texttt{RTS} signals
+of the UART adapter to the apropriate pins on the JST programming connector. They are 
+connected internally to the \texttt{EN} and \texttt{GPIO00} inputs and the ESP programmer
+(\texttt{esptool.py}) supports resetting and flashing the board using those signals.
+
+\bigskip
+\noindent
+The UART programming interface is exposed on another JST GH 6 pin connector as well as
+the \texttt{DTR} and \texttt{RTS} signals.
+
+\begin{minipage}{0.45\textwidth}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=\textwidth]{images/sch-prog-header.pdf}
+        \end{center}
+        \caption{Programming header pinout}
+    \end{figure}
+\end{minipage}
+\hfill\vline\hfill
+\begin{minipage}{0.45\textwidth}
+    \begin{figure}[H]
+        \begin{center}
+            \includegraphics[width=\textwidth]{images/sch-prog-npn.pdf}
+        \end{center}
+        \caption{DTR and RTS signals}
+    \end{figure}
+\end{minipage}
+
+\subsection{Power}
+
+TODO
+
+\subsection{Raspberry Pi}
+
+TODO
+
+\subsection{Misc}
+
+RTC, voltage divider voltmeter

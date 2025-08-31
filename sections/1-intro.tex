@@ -1,0 +1,43 @@
+\section{The project}
+
+\subsection{Intro}
+
+The goal of this project was to create a gateway module for an infotainment system
+that will be used in a Peugeot 206. The system itself has two major components:
+the gateway module and the infotainment computer. The gateway module is a custom board
+based on an ESP32 Wroom 32E module. The board handles power, communication with the car
+and communication with the infotainment computer. The infotainment computer is a 
+Raspberry Pi 4 with a DSI touchscreen display and a custom Linux distribution. The
+computer handles the display and audio.
+
+\bigskip
+\noindent
+This project is focused primarily on the gateway module.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{images/PXL_20250530_205606724.jpg}
+    \caption{The gateway module setup for development}
+  \end{center}
+\end{figure}
+
+\subsection{Main Challenges}
+
+This project has two, maybe three main challenges to consider. The obvious one is car communication.
+The Peugeot 206 doesn't use standard CAN bus communication, but rather something called VAN, see chapter \ref{sec:van_bus}.
+This communication standard is obsolete today, as it was only used in Peugeot and Citroën cars for a limited time.
+Because of that, almost no hardware exists than can understand the protocol, and about as much documentation.
+Thus, we must create our own parser for receiving VAN frames, and figure out how to send them as well.
+
+\bigskip
+\noindent
+The second challenge would be power. We have components requiring both 5 Volts and 3.3 Volts, as well as two 
+power rails: a permanent source and a switched source. The other problem is \textbf{very} noisy and, sometimes,
+unstable input power, so cheap DC-DC converters will not cut it.
+
+\bigskip
+\noindent
+The last challenge, and maybe the most underestimated one, is writing a robust firmware for the gateway module itself.
+The module doesn't just need to parse the VAN frames, it needs to manage its own state, figure out the car state, handle
+the infotainment computer's power input and communication, handle sleep states and manage its own low power state, and, 
+most importantly, not crash.
