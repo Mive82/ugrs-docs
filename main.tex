@@ -1,5 +1,6 @@
 \documentclass[12pt, a4paper]{article}
 % \usepackage{background}
+\usepackage[backend=bibtex,style=numeric,sorting=nyt]{biblatex}
 \usepackage{fontspec}
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -17,6 +18,8 @@
 \usepackage{makecell}
 \usepackage{multirow}
 \usepackage{tabularx}
+\usepackage{csquotes}
+\usepackage[croatian]{babel}
 
 \hypersetup{
     colorlinks=true,
@@ -57,8 +60,11 @@ linenos}
 % contents={\begin{tikzpicture}[remember picture, overlay] \node at ([yshift=0pt, xshift=0pt]current page.center)
 % {\includegraphics[scale=1.5]{images/logoFERIT.png}};\end{tikzpicture}}}
 
-\begin{document}
+\addbibresource{sources.bib} % The filename of the bibliography
 
+\begin{document}
+\renewcommand\bibname{Literatura}
+\selectlanguage{croatian}
 \begin{titlepage}
 
 \begin{center}
@@ -133,5 +139,7 @@ linenos}
 \include{sections/4-esp-fw}
 \include{sections/5-rpi}
 \include{sections/6-conclusion}
+
+\printbibliography[heading=bibintoc, label=toc:bibliography]
 
 \end{document}

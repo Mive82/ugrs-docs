@@ -3,7 +3,8 @@
 
 VAN (Vehicle Area Network) is a serial communication bus developed by the PSA group (Peugeot, Citroën) and Renault as an altenative to
 the CAN bus. It's defined in the ISO standard \textbf{ISO 11519-3}. It utilizes the same physical layer as the CAN bus (a differential pair) and identical
-bus arbitration method, but it differs in the way the data is packaged.
+bus arbitration method, but it differs in the way the data is packaged. Almost all of the information here was sourced from the Atmel TSS463C datasheet
+\cite{tss463c_datasheet}.
 
 \bigskip
 \noindent
@@ -45,14 +46,14 @@ a row encoded with e-Manchester takes 3 + 2 Time slots to send.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/mux1-eman.pdf}
-    \caption[]{e-Mancherster encoding}
+    \caption[]{e-Mancherster encoding \cite{mux1}}
     \label{fig:manchester_bits_mux1}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{images/manchester_bits.pdf}
-    \caption{NRZ and Manchester bits.}
+    \caption{NRZ and Manchester bits. \cite{tss463c_datasheet}}
     \label{fig:manchester_bits_tss463_docs}
 \end{figure}
 
@@ -150,7 +151,7 @@ on the \emph{VAN Comfort} bus.
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/vannetwork.pdf}
-    \caption{VAN and CAN Network layout in the Peugeot 206}
+    \caption{VAN and CAN Network layout in the Peugeot 206 \cite{sedre}}
     \label{fig:van_can_network}
   \end{center}
 \end{figure}

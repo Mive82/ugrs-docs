@@ -58,7 +58,8 @@ we put a new event in the VAN Receiver task queue and restart the peripheral. Th
 received RMT data from its queue and parses it. The data is an array of structs whose defition can be found in
 Listing \ref{lst:rmt_symbol_word_t}. We reconstruct the VAN frame bit by bit from that array, taking into account
 the Manchester bits. After checking the checksum, we separate the identifier and data, put it in a new buffer and
-post it to the queue of the Main task for further processing.
+post it to the queue of the Main task for further processing. The receiving logic was inspired by
+Peter Pinter's arduino library \cite{esp32_rmt_van} and adapted to suit our firmware architecture.
 
 \begin{listing}[H]
   \begin{minted}{C}
@@ -85,7 +86,8 @@ typedef union {
 Once the VAN receiver task posts a new event, the Main task then calls the packet parser which checks
 the identifier and, if it's recognized, parses the data into global buffers and posts appropriate events
 to the Main queue depending on the packet being parsed. See listing \ref{lst:example-van-frame} for an
-example VAN frame struct.
+example VAN frame struct. The vast majority of known decoded VAN frames can be found on Peter Pinter's
+website \cite{vanbus_packets}.
 
 \begin{listing}[H]
   \begin{minted}{C}
