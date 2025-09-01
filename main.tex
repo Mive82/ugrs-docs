@@ -1,5 +1,6 @@
 \documentclass[12pt, a4paper]{article}
 % \usepackage{background}
+\usepackage{fontspec}
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage[figurename=Figure]{caption}
@@ -47,7 +48,9 @@ linenos}
 % \graphicspath{ {images/} }
 \linespread{1.4}
 
-
+\setmainfont{Times New Roman}
+\setsansfont{Arial}
+\setmonofont{Courier New}
 
 % setting the background image, it works, do NOT fucking touch it
 % \backgroundsetup{scale=1, angle=0, opacity=0.15,
@@ -129,5 +132,6 @@ linenos}
 \include{sections/3-hardware}
 \include{sections/4-esp-fw}
 \include{sections/5-rpi}
+\include{sections/6-conclusion}
 
 \end{document}
