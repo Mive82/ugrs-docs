@@ -1,5 +1,6 @@
 pdf:
 	xelatex -no-pdf -interaction=nonstopmode -file-line-error -shell-escape -recorder  main.tex
+	bibtex main
 	xelatex -no-pdf -interaction=nonstopmode -file-line-error -shell-escape -recorder  main.tex
 	xdvipdfmx -E -o "main.pdf"  "main.xdv"
 
