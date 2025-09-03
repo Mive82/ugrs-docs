@@ -23,7 +23,7 @@ Budući da ESP32 ima dvije jezgre, jedna je posvećena isključivo primanju i an
 
 \subsection{Primanje VAN okvira}
 
-Za primanje VAN okvira potrebno je ručno čitati i vremenski pratiti stanja RX pina. Srećom, ESP32 ima sklopovski periferni uređaj koji upravo to omogućuje: RMT periferni uređaj. On može pratiti stanja GPIO pinova i mjeriti koliko dugo su u tom stanju. Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, periferni uređaj može generirati prekid (interrupt) svaki put kada detektira sekvencu \textbf{EOF}.
+Za primanje VAN okvira potrebno je ručno čitati i vremenski pratiti stanja RX pina. Srećom, ESP32 ima sklopovski periferni uređaj koji upravo to omogućuje: RMT periferni uređaj. On može pratiti stanja GPIO pinova i mjeriti koliko dugo su u tom stanju. Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, periferni uređaj može generirati prekid (eng. \textit{interrupt}) svaki put kada detektira sekvencu \textbf{EOF}.
 
 \begin{listing}[H]
   \begin{minted}{C}
@@ -91,7 +91,7 @@ struct psa_van_rpm_speed_struct
 
 \subsection{Slanje VAN okvira}
 
-Za slanje VAN okvira prema vozilu koristimo TSS463C. TSS je zapravo dodatnih 128 bajtova RAM-a koje moramo upravljati, budući da moramo kontrolirati svu memoriju korištenu za slanje i primanje podataka.
+Za slanje VAN okvira prema vozilu koristimo TSS463C. TSS je zapravo dodatnih 128 bajtova RAM-a kojima moramo upravljati, budući da moramo kontrolirati svu memoriju korištenu za slanje i primanje podataka.
 Trenutno se TSS koristi samo za slanje paketa CD mijenjača kako bismo ga mogli emulirati, te za slanje zahtjeva za ponovno pokretanje putnog računala. Poruke CD mijenjača su poruke s neposrednim odgovorom (vidi \ref{subsec:message-types}), dok je zahtjev za ponovno pokretanje putnog računala normalni okvir s zahtjevom za potvrdom (ACK). Paketi CD mijenjača šalju se periodično, svake sekunde, inače će ugrađeni radio smatrati da CD mijenjač nije prisutan i onemogućiti ga.
 
 \noindent
@@ -111,7 +111,7 @@ Programska podrška koristi nekoliko zadataka koji se izvode u vlastitim petljam
 \item Glavni red – Čita ga glavni zadatak. Svi ostali zadaci šalju svoje događaje u red glavnog zadatka. Glavni zadatak zatim odlučuje što učiniti i gdje proslijediti događaj.
 \item TSS red – Čita ga TSS zadatak. Koristi se za stavljanje paketa u red za slanje od strane TSS-a.
 \item UART red – Čita ga UART zadatak. Koristi se za slanje paketa informacijsko-zabavnom računalu.
-\item VAN red (Neiskorišteno) – Čita ga VAN RMT zadatak. Ostavljen za buduću upotrebu.
+\item VAN red (neiskorišteno) – Čita ga VAN RMT zadatak. Ostavljen za buduću upotrebu.
 \end{itemize}
 
 \noindent
@@ -119,15 +119,15 @@ Osim toga, postoji interni red u VAN RMT zadatku. Taj red koristi se isključivo
 
 \bigskip
 \noindent
-Događaji su definirani kao struktura (Listing \ref{lst:mive_global_event}) s identifikatorom događaja (Listing \ref{lst:enum-mive_global_event_t}) i pokazivačem na podatke. Podaci ovise o primljenom događaju.
+Događaji su definirani kao struktura (Izlistaj \ref{lst:mive_global_event}) s identifikatorom događaja (Izlistaj \ref{lst:enum-mive_global_event_t}) i pokazivačem na podatke. Podaci ovise o primljenom događaju.
 
 \subsection{Upravljanje režimima napajanja}
 
-Važno je upravljati potrošnjom energije sustava. Radi lakšeg upravljanja definirali smo nekoliko „stanja vozila”. Pogledajte tablicu \ref{tbl:car-states} za popis tih stanja i ponašanje sustava. Jedna važna komponenta spomenuta u tablici je duboki režim spavanja ESP32-a (deep sleep). Kada je u dubokom snu, ESP je praktički isključen. Jedino što radi na čipu je posebni dio RAM-a, RTC periferijal i, po potrebi, ULP koprocesor. U našem slučaju koristimo isti ADC pin koji se koristi za mjerenje napona baterije kako bismo probudili ESP. Zbog naponskog raspona pina, ne možemo koristiti jednostavan GPIO wake-up, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
+Važno je upravljati potrošnjom energije sustava. Radi lakšeg upravljanja definirali smo nekoliko „stanja vozila”. Pogledajte tablicu \ref{tbl:car-states} za popis tih stanja i ponašanje sustava. Jedna važna komponenta spomenuta u tablici je duboki režim spavanja ESP32-a (eng. \textit{deep sleep}). Kada je u dubokom snu, ESP je praktički isključen. Jedino što radi na čipu je posebni dio RAM-a, RTC periferijal i, po potrebi, ULP koprocesor. U našem slučaju koristimo isti ADC pin koji se koristi za mjerenje napona baterije kako bismo probudili ESP. Zbog naponskog raspona nožice, ne možemo koristiti jednostavano buđenje putem GPIO-a, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
 
 \subsection{ULP koprocesor}
 
-ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i troši vrlo malo energije. Idealno je koristiti ga za ADC mjerenja i buđenje ESP-a. Ne može se programirati izravno u C-u, ali postoje dva načina pisanja koda. Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u firmware binarnu datoteku. Drugi način je korištenje unaprijed definiranih C makroa i pisanje programa u polju unutar C programa te njegovo učitavanje na taj način. Odabrali smo drugu opciju jer je znatno jednostavnija. Pogledajte Listing \ref{lst:ulp-deep-sleep} za ULP kod korišten u dubokom snu.
+ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i troši vrlo malo energije. Idealno je koristiti ga za ADC mjerenja i buđenje ESP-a. Ne može se programirati izravno u C-u, ali postoje dva načina pisanja koda. Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u firmware binarnu datoteku. Drugi način je korištenje unaprijed definiranih C makroa i pisanje programa u polju unutar C programa te njegovo učitavanje na taj način. Odabrali smo drugu opciju jer je znatno jednostavnija. Pogledajte Izlistaj \ref{lst:ulp-deep-sleep} za ULP kod korišten u dubokom snu.
 
 \begin{table}[H]
   \begin{tabularx}{\textwidth} { 
