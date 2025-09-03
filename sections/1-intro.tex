@@ -1,43 +1,33 @@
-\section{The project}
+\section{Projekt}
 
-\subsection{Intro}
+\subsection{Uvod}
 
-The goal of this project was to create a gateway module for an infotainment system
-that will be used in a Peugeot 206. The system itself has two major components:
-the gateway module and the infotainment computer. The gateway module is a custom board
-based on an ESP32 Wroom 32E module. The board handles power, communication with the car
-and communication with the infotainment computer. The infotainment computer is a 
-Raspberry Pi 4 with a DSI touchscreen display and a custom Linux distribution. The
-computer handles the display and audio.
+Cilj ovog projekta bio je izraditi pristupni modul za informacijsko-zabavni sustav
+koji će se koristiti u vozilu Peugeot 206. Sam sustav sastoji se od dvaju glavnih dijelova:
+pristupnog modula i informacijsko-zabavnog računala. Pristupni modul izrađen je kao
+prilagođena pločica temeljena na modulu ESP32 Wroom 32E. Pločica upravlja napajanjem,
+komunikacijom s vozilom te komunikacijom s informacijsko-zabavnim računalom.
+Informacijsko-zabavno računalo čini Raspberry Pi 4 sa zaslonom osjetljivim na dodir
+(DSI) i prilagođenom Linux distribucijom. Računalo upravlja prikazom slike i zvuka.
 
 \bigskip
 \noindent
-Ovaj project je proširenje postojećeg završnog rada `VAN protokol i njegova primjena u automobilima' \cite{mathos-rad}.
+Ovaj projekt je proširenje postojećeg završnog rada `VAN protokol i njegova primjena u automobilima' \cite{mathos-rad}.
 
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/PXL_20250530_205606724.jpg}
-    \caption{The gateway module setup for development}
+    \caption{Izgled spoja pristupnog modula za svrhe razvoja}
   \end{center}
 \end{figure}
 
-\subsection{Main Challenges}
+\subsection{Glavni izazovi}
 
-This project has two, maybe three main challenges to consider. The obvious one is car communication.
-The Peugeot 206 doesn't use standard CAN bus communication, but rather something called VAN, see chapter \ref{sec:van_bus}.
-This communication standard is obsolete today, as it was only used in Peugeot and Citroën cars for a limited time.
-Because of that, almost no hardware exists than can understand the protocol, and about as much documentation, most of it in French.
-Therefore, we must create our own parser for receiving VAN frames, and figure out how to send them as well.
+Ovaj projekt ima dva, možda tri glavna izazova koje treba razmotriti. Najizraženiji je komunikacija s vozilom. Peugeot 206 ne koristi standardnu CAN sabirnicu, već nešto što se naziva VAN, vidi poglavlje \ref{sec:van_bus}. Taj komunikacijski standard danas je zastario, jer je korišten isključivo u vozilima Peugeot i Citroën tijekom ograničenog vremenskog razdoblja. Zbog toga gotovo da i ne postoji hardver koji može razumjeti taj protokol, a dokumentacije je približno jednako malo, pri čemu je većina napisana na francuskom jeziku. Stoga moramo izraditi vlastiti analizator (parser) za primanje VAN okvira te pronaći način kako ih i slati.
 
 \bigskip
 \noindent
-The second challenge would be power. We have components requiring both 5 Volts and 3.3 Volts, as well as two 
-power rails: a permanent source and a switched source. The other problem is \textbf{very} noisy and, sometimes,
-unstable input power, so cheap DC-DC converters will not cut it.
-
+Drugi izazov odnosi se na napajanje. Imamo komponente koje zahtijevaju i 5 volti i 3,3 volta, kao i dva naponska voda: trajni izvor i uključivi izvor. Dodatni problem je \textbf{vrlo} „šumno” i ponekad nestabilno ulazno napajanje, pa jeftini istosmjerni pretvarači (DC-DC) neće biti dovoljni.
 \bigskip
 \noindent
-The last challenge, and maybe the most underestimated one, is writing a robust firmware for the gateway module itself.
-The module doesn't just need to parse the VAN frames, it needs to manage its own state, figure out the car state, handle
-the infotainment computer's power input and communication, handle sleep states and manage its own low power state, and, 
-most importantly, not crash.
+Posljednji izazov, a možda i najpodcijenjeniji, jest izrada pouzdane programske podrške (eng. \textit{firmwarea}) za sam pristupni modul. Modul ne treba samo analizirati VAN okvire, već mora upravljati vlastitim stanjem, pratiti stanje vozila, upravljati napajanjem i komunikacijom informacijsko-zabavnog računala, kontrolirati režime mirovanja i upravljati vlastitim niskonaponskim stanjem, te, što je najvažnije, ne smije dolaziti do pada sustava.

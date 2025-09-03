@@ -1,19 +1,14 @@
 \newpage
 
-\section{Gateway module hardware}
+\section{Sklopovlje pristupnog modula}
 
-The gateway module is designed as a Raspberry Pi HAT board. It has to contain
-necessary hardware for power regulation and car communication. It also has to expose
-all IO for connecting external devices such as an ESP32 programmer and a power cable
-for the Raspberry Pi display.
+Pristupni modul dizajniran je kao Raspberry Pi kapica (eng. \textit{HAT}) ploča. Mora sadržavati
+potrebnu sklopovsku podršku za regulaciju napajanja i komunikaciju s vozilom. Također mora pružiti
+sve ulaze/izlaze (IO) za povezivanje vanjskih uređaja, poput prenositelja programa za ESP32 i napojnog kabela za zaslon Raspberry Pi-ja.
 
-\subsection{Communication hardware}
-In section \ref{sec:van_bus} we have established that the VAN bus is a differential
-protocol much like the CAN bus and, as a result, we can use readily available CAN
-transciever hardware. However, we still need hardware that can generate valid VAN
-frames. For that we use the Atmel TSS463C VAN driver chip. It is the only VAN driver chip
-that exists. For the CAN transciever we use the MCP2551 because it was proven to work with 
-early prototypes and, with it's 5 volt logic, integrates nicely with the TSS.
+\subsection{Hardver za komunikaciju}
+
+U poglavlju \ref{sec:van_bus} utvrdili smo da je VAN sabirnica diferencijalni protokol, slično CAN sabirnici, te da se stoga može koristiti već dostupno sklopovlje za CAN prijemnike i odašiljače. Ipak, još uvijek nam je potrebno sklopovlje koje može generirati valjane VAN okvire. Za to koristimo Atmel TSS463C VAN upravljački čip koji je ujedno i jedini postojeći VAN upravljački čip. Za CAN prijemnik koristimo MCP2551 jer je dokazano da radi s ranim prototipovima, a sa svojom logikom od 5 volti dobro se integrira s TSS čipom.
 
 \begin{figure}[H]
     \begin{minipage}{0.48\textwidth}
@@ -27,41 +22,30 @@ early prototypes and, with it's 5 volt logic, integrates nicely with the TSS.
             \includegraphics[width=\textwidth]{images/sch_mcp.pdf}
         \end{center}
     \end{minipage}
-    \caption{TSS463C and MCP2551 in the schematic}
+    \caption{TSS463C i MCP2551 u shemi}
 \end{figure}
     
 
 \subsubsection{TSS463C}
+TSS463C je VAN upravljački čip koji koristimo za slanje VAN okvira prema vozilu. To je jedini samostalni VAN upravljački čip koji postoji, jer svi ostali moduli unutar vozila imaju VAN upravljački čip ugrađen u svoje SOC-ove. TSS komunicira s ESP32 preko SPI sučelja.
 
-The TSS463C is the VAN driver chip we use for sending VAN frames to the car. It is the only
-standalone VAN driver chip that exists, as all other modules inside the car have a VAN driver
-built into their SOCs. The TSS uses SPI to communicate with the ESP32.
+\subsection{Naponske razine}
 
-\subsection{Voltage levels}
+TSS463C i MCP2551 koriste logiku od 5 V, dok svi ostali dijelovi na pločici, uključujući ESP32, koriste logiku od 3,3 V. Za to koristimo par NTS0104 pretvarača naponskih razina. Jedan se koristi za SPI komunikaciju između TSS-a i ESP-a, dok se drugi koristi za povezivanje VAN RX linije s MCP-a na ESP32 radi čitanja VAN okvira, te TSS prekidne linije (interrupt pin).
 
-The TSS463C and the MCP2551 both use 5V logic, while all other components on the board, including
-the ESP32, use 3.3V logic. For that we use a pair of NTS0104 level shifters. One of them is used
-for the TSS SPI communication with the ESP, while the other is used for connecting the VAN RX line
-from the MCP to the ESP32 for reading VAN frames, and the TSS interrupt pin.
+\subsection{Povezivanje s vozilom}
 
-\subsection{Connecting to the car}
-
-We are connecting to the car in place of the CD Changer unit. The CD Changer connects to
-the original RD3 Headunit in the C3 (pins 13 to 20) portion of the ISO 10487 radio connector.
-See Figure \ref{fig:iso-conn-pinout} for the pinout.
+Povezujemo se s vozilom na mjestu jedinice za CD mjenjač. CD mjenjač se povezuje s originalnom RD3 glavnom jedinicom u 3 (nožice 13 do 20) dijela ISO 10487 radio konektora. Pogledajte Sliku \ref{fig:iso-conn-pinout} za raspored nožica.
 
 \bigskip
 \noindent
-Pins 13 to 17 for data and power are connected to the gateway module with a JST GH 6 pin connector,
-while pins 18 to 20 are wired to a 3.5mm audio cable and connected to the Raspberry Pi. Since the
-naming convention is different between Figures \ref{fig:iso-conn-pinout} and \ref{fig:jst-van-pinout},
-see
+Nožice 13 do 17, koji služe za podatke i napajanje, povezani su s pristupnim modulom pomoću JST GH spojnice s 6 nožica, dok su nožice 18 do 20 spojeni na 3,5 mm zvučni kabel i povezani s Raspberry Pi-jem. Budući da konvencija imenovanja razlikuje Slike \ref{fig:iso-conn-pinout} i \ref{fig:jst-van-pinout}, pogledajte …
 
 \begin{minipage}{0.45\textwidth}
     \begin{figure}[H]
         \begin{center}
             \includegraphics[width=\textwidth]{images/ISO-conn.pdf}
-            \caption{ISO connector pinout \cite{rd3_manual}}
+            \caption{Legenda ISO spojnice \cite{rd3_manual}}
             \label{fig:iso-conn-pinout}
         \end{center}
     \end{figure}    
@@ -71,7 +55,7 @@ see
     \begin{figure}[H]
         \begin{center}
             \includegraphics[width=\textwidth]{images/sch-jst-van.pdf}
-            \caption{JST Connector in the schematic}
+            \caption{JST spojnica unutar sheme}
             \label{fig:jst-van-pinout}
         \end{center}
     \end{figure}  
@@ -93,31 +77,23 @@ see
             \hline
         \end{tabular}
     \end{center}
-    \caption{ISO to JST connection legend}
+    \caption{Legenda ISO na JST spojnice}
 \end{table}
 
-\subsection{ESP32 Flashing}
+\subsection{Prenošenje programske podrške na  ESP32}
 
-Flashing firmware on the ESP32 is done using UART. In order to flash the firmware, the
-ESP must first be put into flashing mode. This can be done by pulling pins \texttt{GPIO00}
-and \texttt{GPIO02} low when powering on the board. This can be achived in two ways
-on our board: Manually by pressing the \texttt{BOOT} momentary button while resetting the
-board with the \texttt{EN} button, or by connecting the \texttt{DTR} and \texttt{RTS} signals
-of the UART adapter to the apropriate pins on the JST programming connector. They are 
-connected internally to the \texttt{EN} and \texttt{GPIO00} inputs and the ESP programmer
-(\texttt{esptool.py}) supports resetting and flashing the board using those signals.
+Prenošenje programske podrške na ESP32 obavlja se putem UART sučelja. Kako bi se programska podrška mogla prenjeti, ESP se prvo mora staviti u režim preuzimanja koda. To se može postići tako da se nožice \texttt{GPIO00} i \texttt{GPIO02} postave na nisku naopnsku razinu prilikom spajanja ploče na izvor napajanja. Na našoj ploči to se može ostvariti na dva načina: ručno pritiskom na gumb \texttt{BOOT} dok se ploča ponovno pokrene pritiskom na gumb \texttt{EN}, ili spajanjem signala \texttt{DTR} i \texttt{RTS} UART adaptera na odgovarajuće nožice na JST programskoj spojnici. Oni su povezani u unutrašnjosti s ulazima \texttt{EN} i \texttt{GPIO00}, a ESP programator (\texttt{esptool.py}) podržava ponovno pokretanje i prenošenje programske podrške na ploču korištenjem tih signala.
 
 \bigskip
 \noindent
-The UART programming interface is exposed on another JST GH 6 pin connector as well as
-the \texttt{DTR} and \texttt{RTS} signals.
+UART programsko sučelje dostupno je na drugoj JST GH 6-pinskoj spojnici, uključujući signale \texttt{DTR} i \texttt{RTS}.
 
 \begin{minipage}{0.45\textwidth}
     \begin{figure}[H]
         \begin{center}
             \includegraphics[width=\textwidth]{images/sch-prog-header.pdf}
         \end{center}
-        \caption{Programming header pinout}
+        \caption{Legenda spojnice za programiranje}
     \end{figure}
 \end{minipage}
 \hfill\vline\hfill
@@ -126,86 +102,56 @@ the \texttt{DTR} and \texttt{RTS} signals.
         \begin{center}
             \includegraphics[width=\textwidth]{images/sch-prog-npn.pdf}
         \end{center}
-        \caption{DTR and RTS signals}
+        \caption{DTR i RTS signali}
     \end{figure}
 \end{minipage}
 
-\subsection{Power}
+\subsection{Napajanje}
 
-For power, we have two 12V voltage rails to work with. The first one is always live (\texttt{+12V Car Battery}), and the second one is switched on only when the car is awake (\texttt{+12V Ignition}).
-The second rail is incorrectly labeled as it doesn't exactly follow the ignition key state, but the car's awake state. The car
-will wake up when an action happens (locks lock/unlock, doors open/close, key gets put in the ACC position, etc.) and will go to sleep after some
-time if nothing is happening and the key is not in the ACC position.
+Za napajanje imamo dvija 12V naponska void. Prvi je uvijek aktivan (\texttt{+12V Car Battery}), dok se drugi uključuje samo kada je vozilo aktivno (\texttt{+12V Ignition}). Druga vodilica je pogrešno označena jer ne prati točno stanje ključa paljenja, već stanje aktivnosti vozila. Vozilo se aktivira kada se dogodi neka radnja (zaključavanje/otključavanje, otvaranje/zatvaranje vrata, ključ u ACC položaju itd.) i prelazi u stanje mirovanja nakon određenog vremena ako se ništa ne događa i ključ nije u ACC položaju.
 
 \bigskip
 \noindent
-As we have two rails, we have two separate voltage regulators (MP8759GD1) tasked with turning the 12 V from the input into 5 V at the output. 
-The voltage regulator on the \texttt{+12V battery} rail is used to power the ESP32, TSS, and MCP chips, as they need to be able to be active even when the car is in sleep mode. 
-However, as the ESP32 requires 3.3 V, we had to expand the design with a single 3.3V LDO voltage regulator.
+Kako imamo dva voda, imamo dva zasebna regulatora napona (MP8759GD1) koja pretvaraju 12 V ulaza u 5 V izlaza. Regulator na vodu \texttt{+12V Car Battery} napaja ESP32, TSS i MCP čipove, jer oni moraju biti aktivni i kada vozilo spava. Budući da ESP32 zahtijeva 3,3 V, dizajn je proširen jednim LDO regulatorom od 3,3 V.
 
 \bigskip
 \noindent
-The other 5 V voltage regulator is tasked with supplying the RPi and the peripheral LCD with power. 
-As they are not used for communicating with the car, there is no need for them to have a constant power supply.
+Drugi 5 V regulator napaja Raspberry Pi i periferni LCD. Kako oni nisu uključeni u komunikaciju s vozilom, nije im potrebno stalno napajanje.
 
 \bigskip
 \noindent
-Apart from the voltage regulator ICs, on the schematic there is an outstanding number of filtering capacitors. 
-They are required to provide a stable voltage source for the other ICs, as some of them are quite sensitive to noise and could start behaving in unexpected ways.
-Another, often overlooked component when designing power supplies is the TVS diode, 
-which is connected to the regulator input in a reverse polarized configuration, ensuring a maximum voltage of 12 V.
+Osim IC regulatora napona, na shemi se nalazi velik broj kondenzatora koji obnašaju zadatak filtriranja smetnji. Oni su potrebni kako bi se osigurano stabilan izvor napona za ostale IC-e, budući da su neki vrlo osjetljivi na šum i mogu se početi ponašati nepredvidivo. Još jedan često zanemaren element pri dizajniranju napajanja je TVS dioda, spojena inverzno polarizirana na ulaz regulatora, osiguravajući maksimalni napon od 12 V.
 
 \subsection{Raspberry Pi}
 
-The RPi is a slave to the ESP32 in the sense that it does not handle any communication with the car or any other system-critical matter. 
-Its job is to render the telemetry data received from the ESP32 over UART on the LCD and handle the \emph{entertainment} part of the infotainment system. 
-As a noncritical part of the system, there is no need for uninterrupted power access; hence, it is powered only when the car is awake according
-to table \ref{tbl:car-states}.
+Raspberry Pi je podređeni uređaj ESP32-u u smislu da ne upravlja komunikacijom s vozilom niti bilo kojom drugom kritičnom funkcijom sustava. Njegova uloga je prikaz telemetrije podataka primljenih od ESP32 preko UART-a na LCD-u i upravljanje dijelom sustava vezanim uz zabavu. Kao nekritični dio sustava, ne zahtijeva neprekidno napajanje; stoga se napaja samo kada je vozilo aktivno prema tablici \ref{tbl:car-states}.
 
-\subsection{Misc}
+\subsection{Ostalo}
 
 \paragraph{RTC}
-As the existing car display doesn't report the time on the bus, an additional RTC was needed. The selected RTC is DS3231MZ.
-It's connected to the Raspberry Pi over I2C. It is readily available, accurate and supported out of the box by the Linux kernel.
+Budući da postojeći zaslon vozila ne prikazuje vrijeme preko sabirnice, potreban je dodatni RTC. Odabrani RTC je DS3231MZ. Povezan je s Raspberry Pi-jem putem I2C sučelja. Lako je dostupan, precizan i podržan je izravno u Linux jezgri.
 
 \bigskip
 \noindent
-In order to be able to read out the battery voltage with the ESP32 ADCs, a simple resistor voltage divider circuit was used. 
-With a division ratio of 4:1, on pin 9, IO33, there is 1/5 of the battery voltage. 
-The resistors are in the 100 k$\Omega$ range, ensuring a current in the 10 $\mu$A range.
+Za očitavanje napona baterije pomoću ESP32 ADC-a korišten je jednostavan naponski djelitelj s otpornicima. S omjerom dijeljenja 4:1, na nožici 9 (IO33) dolazi 1/5 napona baterije. Otpornici su reda veličine stotina k$\Omega$, osiguravajući struju reda veličine od desetak $\mu$A.
 
 \bigskip
 \noindent
-To help with debugging, there are many LEDs placed on the communication and power lines along with a few debug connectors.
+Za olakšavanje ispravljanja pogrešaka, na komunikacijskim i napojnim linijama postavljene su mnoge LED diode, kao i nekoliko pristupnih točki.
 
-\subsection{Design defects}
+\subsection{Dizajnerske greške}
 
-Of course, a project isn't proper if everything works the first time. The PCB has a couple design defects that were able to
-be bypassed. We will outline some of them here.
+Naravno, projekt nije pravi ako sve radi prvi put. PCB ima nekoliko dizajnerskih grešaka koje su uspješno zaobiđene. Ovdje ćemo navesti neke od njih.
 
-\paragraph{Strapping pins}
+\paragraph{Strapping nožice}
+Pogriješili smo i previdjeli neke ESP32 strapping pinove. To su nožice koje ESP koristi pri pokretanju za postavljanje određenih parametara. Nožicu koji nismo previdjeli je bila GPIO12. Ta nožica postavlja razinu napona unutarnje SPI flash memorije na kojoj je pohranjena programska podrška. Nožica je dijeljena s SPI sabirnicom koja se koristi za komunikaciju s TSS-om, te je stanje pina bilo neodređeno. To je uzrokovalo probleme s pokretanjem i flashanjem ploče. Problem je zaobiđen trajnim postavljanjem razine napona putem programski upravljanog osigurača (eng. \textit{eFuse).
 
-We made a mistake and overlooked some ESP32 strapping pins. They are pins used by the ESP during boot to set some parameters.
-The pin we overlooked was GPIO12. This pin sets the voltage level of the internal SPI flash on which the firmware is stored.
-This pin is shared by the SPI bus used to communicate with the TSS, and as a result the state of the pin was always undetermined.
-This resulted in the board having issues booting and flashing sometimes. It was bypassed by burning an eFuse to set the
-voltage level permanently.
-
-\paragraph{MCP and TSS reset pins}
-
-The MCP2551 can be put into a low power state by the Rs pin. We had the idea of controlling the state of that pin using
-a transistor switch. However, the switch was incorrectly designed and the MCP was always in a low power state. This prevented
-us from transmitting data to the VAN bus. This was bypassed by permanently putting the MCP into a running state with a 10k$\Omega$
-pulldown. This resulted in increased idle power consumption by a few mA.
+\paragraph{Reset pinovi MCP i TSS}
+MCP2551 se može staviti u stanje niske potrošnje putem Rs nožice. Planirali smo kontrolirati stanje nožice pomoću tranzistorskog prekidača, međutim prekidač je bio pogrešno dizajniran i MCP je uvijek bio u niskoj potrošnji, što je sprječavalo slanje podataka na VAN sabirnicu. Problem je zaobiđen trajnim postavljanjem MCP-a u aktivno stanje pomoću 10 k$\Omega$ pull-down otpornika, što je povećalo potrošnju u praznom hodu za nekoliko miliampera.
 
 \bigskip
 \noindent
-The same issue was with the reset pin on the TSS463C. However, the TSS is always reset by software on boot, so that was easily bypassed
-by just removing all components around the reset pin.
+Isti problem bio je s reset nožicom na TSS463C. Budući da se TSS uvijek resetira programski prilikom pokretanja, problem je jednostavno zaobiđen uklanjanjem svih komponenti oko reset nožice.
 
-\paragraph{Level shifter}
-
-The level shifter used for the VAN RX line connected to the ESP32 used the \texttt{+5V Ignition} rail as the reference for
-the 5V side. This rail, however, was turned off when the ESP decided the Raspberry Pi shouldn't be powered on. As a result,
-the ESP would power this down and never receive a VAN frame again, preventing the firmware from powering the rail back on.
-This was bypassed by cutting the trace and connecting the reference to the \texttt{+5V Battery} rail.
+\paragraph{Pretvarač naponskih razina}
+Pretvarač naponskih razina korišten za VAN RX liniju spojenu na ESP32, koristio je \texttt{+5V Ignition} vod kao referencu za 5 V stranu. Taj vod, međutim, je bio isključen kada je ESP odlučio da Raspberry Pi ne treba biti napojen. Kao rezultat, ESP bi ga isključio i više nikada ne bi primio VAN okvir, sprječavajući ponovno uključivanje voda. Problem je zaobiđen rezanjem voda i spajanjem reference na \texttt{+5V Baterija} vod.

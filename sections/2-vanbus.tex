@@ -1,22 +1,16 @@
 \newpage
-\section{VAN Bus}\label{sec:van_bus}
+\section{VAN sabirnica}\label{sec:van_bus}
 
-VAN (Vehicle Area Network) is a serial communication bus developed by the PSA group (Peugeot, Citroën) and Renault as an altenative to
-the CAN bus. It's defined in the ISO standard \textbf{ISO 11519-3}. It utilizes the same physical layer as the CAN bus (a differential pair) and identical
-bus arbitration method, but it differs in the way the data is packaged. Almost all of the information here was sourced from the Atmel TSS463C datasheet
-\cite{tss463c_datasheet}.
+VAN (eng. \textit{Vehicle Area Network}) je serijska komunikacijska sabirnica koju su razvili PSA grupa (Peugeot, Citroën) i Renault kao alternativu CAN sabirnici. Definirana je u ISO standardu \textbf{ISO 11519-3}. Koristi istu fizičku razinu kao CAN sabirnica (diferencijalni par) i identičnu metodu arbitraže na sabirnici, ali se razlikuje u načinu pakiranja podataka. Gotovo sve informacije navedene ovdje preuzete su iz Atmel TSS463C datasheeta \cite{tss463c_datasheet}.
 
 \bigskip
 \noindent
-Like CAN, the VAN protocol uses identifiers to differentiate between messages and perform bus arbitration. Additionally, it also
-has the ability for so called "In-frame" responses, bigger message sizes (28 bytes instead of 8 bytes in CAN) and the
-ability to directly communicate with another device.
+
+Kao i CAN, VAN protokol koristi identifikatore za razlikovanje poruka i izvođenje arbitraže na sabirnici. Dodatno, omogućuje tzv. „odgovore unutar okvira” (In-frame), veće veličine poruka (28 bajtova umjesto 8 bajtova kao u CAN-u) te mogućnost izravne komunikacije s drugim uređajem.
 
 \bigskip
 \noindent
-Data on the VAN network is packed into frames. Frames consist of multiple parts: Start of frame (\textbf{SOF}),
-message identifier (\textbf{IDEN}), command (\textbf{COM}), message data (\textbf{DATA}), frame checksum (\textbf{FCS}),
-end of data signal (\textbf{EOD}), acknowledge signal (\textbf{ACK}) and the end of frame signal (\textbf{EOF}).
+Podaci na VAN mreži pakiraju se u okvire. Okviri se sastoje od više dijelova: početka okvira (\textbf{SOF}), identifikatora poruke (\textbf{IDEN}), naredbe (\textbf{COM}), podataka poruke (\textbf{DATA}), kontrolnog zbira okvira (\textbf{FCS}), signala kraja podataka (\textbf{EOD}), signala potvrde (\textbf{ACK}) te signala kraja okvira (\textbf{EOF}).
 
 \begin{table}[H]
     \centering
@@ -28,130 +22,105 @@ end of data signal (\textbf{EOD}), acknowledge signal (\textbf{ACK}) and the end
          &  & EXT & RAK & R/W & RTR &  &  &  &  & \\
         \hline
     \end{tabular}
-    \caption{VAN frame format}
+    \caption{VAN format okvira}
     \label{fig:van_frame_format}
 \end{table}
 
-\subsection{Enhanced Manchester code}
+\subsection{Unaprijeđeno Manchesterovog kodiranje}
 
-All VAN frames are coded using Enhanced Manchester coding (e-Manchester).
-With e-Manchester, after sending 3 NRZ bits, the fourth bit is sent as a Manchester bit.
-Sending data this way ensures easier syncronization on the bus. This is a more predictable
-method of bitstuffing as opposed to the CAN bus method.
+Svi VAN okviri kodirani su pomoću unaprijeđenog Manchesterovog kodiranja (eng. \textit{Enhanced Manchester, e-Manchester}).
+Kod e-Manchestera, nakon slanja tri NRZ bita, četvrti bit šalje se kao Manchesterov bit.
+Slanje podataka na ovaj način omogućuje lakšu sinkronizaciju na sabirnici. Ovo je predvidljivija metoda ubacivanja bitova (bit-stuffing) u usporedbi s metodom korištenom na CAN sabirnici.
 
-In Table \ref{fig:van_frame_format} we can see the number of bits for each part of the frame, as well as
-the number of Time Slots (TS). Since a Manchester bit takes two time slots to send, 4 bits in
-a row encoded with e-Manchester takes 3 + 2 Time slots to send.
+U Tablici \ref{fig:van_frame_format} prikazan je broj bitova za svaki dio okvira, kao i broj vremenskih intervala (Time Slots, TS). Budući da Manchesterov bit zahtijeva dva vremenska intervala za prijenos, četiri bita u nizu kodirana e-Manchester metodom prenose se u 3 + 2 vremenska intervala.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/mux1-eman.pdf}
-    \caption[]{e-Mancherster encoding \cite{mux1}}
+    \caption[]{e-Mancherster encodiranje \cite{mux1}}
     \label{fig:manchester_bits_mux1}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{images/manchester_bits.pdf}
-    \caption{NRZ and Manchester bits. \cite{tss463c_datasheet}}
+    \caption{NRZ i Manchester bitovi. \cite{tss463c_datasheet}}
     \label{fig:manchester_bits_tss463_docs}
 \end{figure}
 
 \subsection{Messages}
 
-A device/module connected to the network can be one of three types:
+Uređaj ili modul povezan na mrežu može biti jednog od tri tipa:
 \begin{itemize}
-  \item The Autonomous module. A bus master. It can send \textbf{SOF} sequences, initiate data
-        transfers and receive messages.
-  \item The Synchronous access module. It cannot send \textbf{SOF} sequences, but can
-        initiate data transfers and receive messages.
-  \item The Slave module. It can only send messages using in-frame responses and can also
-        receive messages.
+  \item Autonomni modul – glavni uređaj sabirnice. Može slati sekvence \textbf{SOF}, započeti prijenos podataka i primati poruke.
+  \item Modul sa sinkronim pristupom – ne može slati sekvence \textbf{SOF}, ali može započeti prijenos podataka i primati poruke.
+  \item Podređeni modul (eng. \textit{Slave}) – može slati poruke samo pomoću odgovora unutar okvira (eng. \textit{in-frame}), a također može primati poruke.
 \end{itemize}
 
 \begin{figure}
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/ranking.pdf}
-    \caption{Module types}
+    \caption{Tipovi modula}
   \end{center}
 \end{figure}
 
 \noindent
-The VAN protocol supports multiple message types. They are differentiated using the identifier (\textbf{IDEN})
-and command (\textbf{COM}) fields. The identifier is 12 bits long and is followed by the 4 command bits. Due to the
-way the bus arbitration works, a smaller identifier has priority on the bus. While the identifier value is completely
-up to the user, the command bits are strictly defined and determine the message type that will be sent on the bus:
-\begin{itemize}
-    \item EXT - always 1
-    \item RAK - „Request Acknowledge“. If 1, the receipient must acknowledge the message reception. If 0,
-          the ACK signal must not be sent.
-    \item R/W - „Read/Write“. Signals the data direction. If 0, then it's a `write' message, 
-          a device is sending data intended for another device. If 1, then it's a `read' message,
-          and it implies a request for data and expects an answer.
-    \item RTR - „Remote Transmission Request“. If 0, the message contains data. If 1, the message
-          contains no data and an in-frame response request is implied. The combination R/W = 0 and RTR = 1
-          is forbidded on the bus.
-\end{itemize}
+VAN protokol podržava više tipova poruka. Razlikuju se pomoću polja identifikatora (\textbf{IDEN}) i naredbe (\textbf{COM}). Identifikator je dug 12 bita i slijedi ga 4 bita naredbe. Zbog načina na koji funkcionira arbitraža na sabirnici, manji identifikator ima prednost na sabirnici. Dok je vrijednost identifikatora potpuno proizvoljna, bitovi naredbe su strogo definirani i određuju tip poruke koja će se poslati na sabirnici:
 
-\subsubsection{Message types}
+\begin{itemize}
+  \item EXT – uvijek 1
+  \item RAK – „\textit{Request Acknowledge}” (zahtjev za potvrdom). Ako je 1, primatelj mora potvrditi primitak poruke. Ako je 0, signal ACK se ne šalje.
+  \item R/W – „\textit{Read/Write}” (čitanje/pisanje). Označava smjer podataka. Ako je 0, radi se o poruci za pisanje („write”), gdje uređaj šalje podatke namijenjene drugom uređaju. Ako je 1, radi se o poruci za čitanje („read”), što podrazumijeva zahtjev za podacima i očekuje odgovor.
+  \item RTR – „\textit{Remote Transmission Request}” (zahtjev za daljinskim prijenosom). Ako je 0, poruka sadrži podatke. Ako je 1, poruka ne sadrži podatke i implicira zahtjev za odgovor unutar okvira (in-frame response). Kombinacija R/W = 0 i RTR = 1 je zabranjena na sabirnici.
+\end{itemize}
+\subsubsection{Tipovi poruka}
 \label{subsec:message-types}
-Here we will list frame types relevant to this project. There are more, but we only use these.
+Ovdje ćemo navesti tipove okvira relevantne za ovaj projekt. Postoje i drugi, ali koristimo samo ove.
 
 \smallskip
 \noindent
-Reminder: Dominant = 0, Recessive = 1.
+Podsjetnik: Dominantno = 0, Recesivno = 1.
 
-\paragraph{Normal frame}
+\paragraph{Normalni okvir}
 
-The simplest frame type. One module sends an entire frame with data, and may or may not request an ACK.
-In the case no ACK is requested, the message is treated as a broadcast message.
-
+Najjednostavniji tip okvira. Jedan modul šalje cijeli okvir s podacima i može, ali ne mora, zatražiti potvrdu (ACK). U slučaju da se potvrda ne traži, poruka se tretira kao poruka za emitiranje (eng. \textit{broadcast}).
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/normalframe_ack.pdf}
-    \caption{Normal frame transimssion with ACK}
+    \caption{Prijenos normalnog okvira sa ACK}
     \label{fig:normal_frame_ack}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/normalframe_noack.pdf}
-    \caption{Normal frame transimssion without ACK}
+    \caption{Prijenos normalnog okvira bez ACK}
     \label{fig:normal_frame_noack}
 \end{figure}
-
-\paragraph{Reply Request Frame with Immediate Reply}
+\paragraph{Okvir zahtjeva za odgovor s neposrednim odgovorom}
 \label{p:immediate-reply}
 
-This is the only frame in which a slave module can transmit data. The only difference on the
-bus is the R/W bit changed state compared to the normal frame.
-The bus master generates the \textbf{SOF}, the initiator generates the identifier and first 3 bits of the command,
-and the ACK signal. The rest (RTR, data and checksum) are generated by the replying module.
+Ovo je jedini okvir u kojem podređeni modul (eng. \textit{slave}) može slati podatke. Jedina razlika na sabirnici je promjena stanja bita R/W u odnosu na normalni okvir.
+Glavni modul sabirnice (eng. \textit{bus master}) generira \textbf{SOF}, inicijator generira identifikator i prva tri bita naredbe, te signal ACK. Ostalo (RTR, podaci i kontrolnu sumu) generira modul koji odgovara.
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{images/immediate_reply.pdf}
-    \caption{Reply Request Frame with Immediate Reply}
-    \label{fig:immediate_reply_frame}
+\centering
+\includegraphics[width=\textwidth]{images/immediate_reply.pdf}
+\caption{Okvir zahtjeva za odgovor s neposrednim odgovorom}
+\label{fig:immediate_reply_frame}
 \end{figure}
 
-\subsection{VAN network}
+\subsection{VAN mreža}
 
-We can connect multiple modules together to create a network. We can also connect multiple networks together
-and use a gateway module to route data between networks. In the Peugeot 206 
-we have 1 CAN network \emph{CAN Engine} and 3 VAN networks: \emph{VAN Comfort}, \emph{VAN Body 1} and \emph{VAN Body 2}.
+Više modula možemo povezati zajedno kako bismo stvorili mrežu. Također je moguće povezati više mreža i koristiti pristupni modul (eng. \textit{gateway}) za usmjeravanje podataka između mreža. U vozilu Peugeot 206 imamo jednu CAN mrežu \emph{CAN Engine} i tri VAN mreže: \emph{VAN Comfort}, \emph{VAN Body 1} i \emph{VAN Body 2}.
 
 \noindent
-We can see the layout in figure \ref{fig:van_can_network}. From there we also see the gateway module, the BSI.
-This module is present in all PSA group cars. This particular BSI is from the AEE2001 generation, the only generation
-to use the VAN bus. Other generations, the AEE2004 and AEE2010 both exclusively use CAN. 
-Our infotainment system will be connected in place of the CD changer, module number 8415 on figure \ref{fig:van_can_network}
-on the \emph{VAN Comfort} bus.
-
+Raspored mreža prikazan je na slici \ref{fig:van_can_network}. Tamo također možemo vidjeti pristupni modul, BSI. Ovaj modul prisutan je u svim vozilima PSA grupe. Konkretni BSI dolazi iz generacije AEE2001, jedine generacije koja koristi VAN sabirnicu. Druge generacije, AEE2004 i AEE2010, koriste isključivo CAN.
+Naš informacijsko-zabavni sustav bit će spojen na mjesto CD mjenjača, modul broj 8415 na slici \ref{fig:van_can_network} na \emph{VAN Comfort} sabirnici.
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/vannetwork.pdf}
-    \caption{VAN and CAN Network layout in the Peugeot 206 \cite{sedre}}
+    \caption{Pregled VAN i CAN mreže u Peugeot 206 automobilu \cite{sedre}}
     \label{fig:van_can_network}
   \end{center}
 \end{figure}

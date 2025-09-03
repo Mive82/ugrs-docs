@@ -5,4 +5,4 @@ pdf:
 	xdvipdfmx -E -o "main.pdf"  "main.xdv"
 
 clean:
-	rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.xdv
+	rm -f *.aux *.log *.out *.toc *.fdb_latexmk *.fls *.xdv sections/*.aux
