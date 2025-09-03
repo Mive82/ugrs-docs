@@ -1,11 +1,16 @@
 \newpage
 \section{Gateway module software}
 
-Pristupni modul je najvažniji dio ovog projekta jer se sučeljava s vozilom i odgovoran je za upravljanje napajanjem cijelog sustava. Modul prima i analizira VAN okvire, organizira podatke i zatim ih prosljeđuje informacijsko-zabavnom računalu. Također obavlja i obrnuti proces: može primati podatke s informacijsko-zabavnog računala i prenijeti odgovarajući VAN okvir na sabirnicu. Upravljanje napajanjem također je važan dio programske podrške, budući da prekomjerna potrošnja u praznom hodu brzo iscrpljuje bateriju vozila.
+Pristupni modul je najvažniji dio ovog projekta jer se sučeljava s vozilom i odgovoran je za upravljanje napajanjem cijelog sustava. 
+Modul prima i analizira VAN okvire, organizira podatke i zatim ih prosljeđuje infotainment računalu. 
+Također obavlja i obrnuti proces: može primati podatke s infotainment računala i prenijeti odgovarajući VAN okvir na sabirnicu. 
+upravljanje napajanjem također je važan dio programske podrške, budući da prekomjerna potrošnja u stanju mirovanja brzo iscrpljuje akumulator vozila.
 
 \subsection{Okvir i pristup}
 
-Kao program za razvoj koristimo ESP-IDF okvir koji pruža Espressif. Okvir se temelji na operativnom sustavu FreeRTOS. Zbog prirode OS-a i programskog okruženja, programska podrška modula napisana je koristeći pristup temeljen na događajima.
+Kao program za razvoj koristimo ESP-IDF programski okvir koji pruža Espressif. 
+Okvir se temelji na operativnom sustavu FreeRTOS. Zbog prirode OS-a i programskog okruženja, programska podrška modula napisana je 
+koristeći pristup temeljen na događajima.
 
 \bigskip
 \noindent
@@ -19,11 +24,15 @@ Koristimo sljedeće događaje kao osnovu za glavne petlje/zadatake:
 \end{itemize}
 
 \noindent
-Budući da ESP32 ima dvije jezgre, jedna je posvećena isključivo primanju i analiziranju VAN okvira, jer su oni vrlo učestali i ne želimo propustiti niti jedan.
+Budući da ESP32 ima dvije jezgre, jedna je posvećena isključivo primanju i analiziranju VAN okvira, jer su oni vrlo česti i ne želimo propustiti niti jedan.
 
 \subsection{Primanje VAN okvira}
 
-Za primanje VAN okvira potrebno je ručno čitati i vremenski pratiti stanja RX pina. Srećom, ESP32 ima sklopovski periferni uređaj koji upravo to omogućuje: RMT periferni uređaj. On može pratiti stanja GPIO pinova i mjeriti koliko dugo su u tom stanju. Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, periferni uređaj može generirati prekid (eng. \textit{interrupt}) svaki put kada detektira sekvencu \textbf{EOF}.
+Za primanje VAN okvira potrebno je ručno čitati i vremenski pratiti stanja RX pina. 
+Srećom, ESP32 ima sklopovski periferni uređaj koji upravo to omogućuje: RMT periferni uređaj. 
+On može pratiti stanja GPIO pinova i mjeriti koliko dugo su u tom stanju. 
+Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, periferni uređaj može generirati prekid (eng. \textit{interrupt}) 
+svaki put kada detektira sekvencu \textbf{EOF}.
 
 \begin{listing}[H]
   \begin{minted}{C}
@@ -43,9 +52,15 @@ Za primanje VAN okvira potrebno je ručno čitati i vremenski pratiti stanja RX 
 \end{listing}
 
 \noindent
-Kada se detektira sekvenca \textbf{EOF}, RMT periferijalni upravljački program generira prekid (eng. \textit{interrupt}). U okviru tog prekida, u red zadataka (eng. \textit{task queue}) modula za primanje VAN okvira postavljamo novi događaj i ponovno pokrećemo periferijal. Modul za primanje VAN okvira preuzima primljene RMT podatke iz reda i analizira ih. Podaci su polje struktura čija definicija je prikazana u izlistaju \ref{lst:rmt_symbol_word_t}.
+Kada se detektira sekvenca \textbf{EOF}, RMT periferijalni upravljački program generira prekid (eng. \textit{interrupt}). 
+U okviru tog prekida, u red zadataka (eng. \textit{task queue}) modula za primanje VAN okvira postavljamo novi događaj i ponovno pokrećemo RMT. 
+Modul za primanje VAN okvira preuzima primljene RMT podatke iz reda i analizira ih. 
+Podaci su polje struktura čija definicija je prikazana u kodu \ref{lst:rmt_symbol_word_t}.
 
-VAN okvir rekonstruiramo bit po bit iz tog polja, uzimajući u obzir Manchesterove bitove. Nakon provjere kontrolnog zbroja (eng. \textit{checksum}), izdvajamo identifikator i podatke, stavljamo ih u novi međuspremnik i postavljamo u red glavnog zadatka (eng. \textit{Main task}) za daljnju obradu. Logika primanja nadahnuta je Peter Pinterovom Arduino bibliotekom \cite{esp32_rmt_van} i prilagođena je arhitekturi naše programske podrške.
+VAN okvir rekonstruiramo bit po bit iz tog polja, uzimajući u obzir Manchester bitove. 
+Nakon provjere kontrolnog zbroja (eng. \textit{checksum}), izdvajamo identifikator i podatke, 
+stavljamo ih u novi međuspremnik i postavljamo u red glavnog zadatka (eng. \textit{Main task}) za daljnju obradu. 
+Logika primanja inspirirana je Peter Pinterovom Arduino bibliotekom \cite{esp32_rmt_van} i prilagođena je arhitekturi naše programske podrške.
 
 \begin{listing}[H]
   \begin{minted}{C}
@@ -69,7 +84,11 @@ typedef union {
 
 \subsection{Analiza VAN okvira}
 
-Kada modul za primanje VAN okvira postavi novi događaj, glavni zadatak (eng. \textit{Main task}) poziva parser paketa koji provjerava identifikator i, ako je prepoznat, analizira podatke u globalne međuspremnike te postavlja odgovarajuće događaje u red glavnog zadatka ovisno o paketu koji se obrađuje. Pogledajte izlistaj \ref{lst:example-van-frame} za primjer strukture VAN okvira. Velika većina poznatih dekodiranih VAN okvira dostupna je na web stranici Petera Pintera \cite{vanbus_packets}.
+Kada modul za primanje VAN okvira postavi novi događaj, glavni zadatak (eng. \textit{Main task}) 
+poziva parser paketa koji provjerava identifikator i, ako je prepoznat, analizira podatke u globalne međuspremnike 
+te postavlja odgovarajuće događaje u red glavnog zadatka ovisno o paketu koji se obrađuje. 
+Pogledajte kod \ref{lst:example-van-frame} za primjer strukture VAN okvira. 
+Velika većina poznatih dekodiranih VAN okvira dostupna je na web stranici Petera Pintera \cite{vanbus_packets}.
 
 \begin{listing}[H]
   \begin{minted}{C}
@@ -91,43 +110,61 @@ struct psa_van_rpm_speed_struct
 
 \subsection{Slanje VAN okvira}
 
-Za slanje VAN okvira prema vozilu koristimo TSS463C. TSS je zapravo dodatnih 128 bajtova RAM-a kojima moramo upravljati, budući da moramo kontrolirati svu memoriju korištenu za slanje i primanje podataka.
-Trenutno se TSS koristi samo za slanje paketa CD mijenjača kako bismo ga mogli emulirati, te za slanje zahtjeva za ponovno pokretanje putnog računala. Poruke CD mijenjača su poruke s neposrednim odgovorom (vidi \ref{subsec:message-types}), dok je zahtjev za ponovno pokretanje putnog računala normalni okvir s zahtjevom za potvrdom (ACK). Paketi CD mijenjača šalju se periodično, svake sekunde, inače će ugrađeni radio smatrati da CD mijenjač nije prisutan i onemogućiti ga.
+Za slanje VAN okvira prema vozilu koristimo TSS463C. 
+TSS je zapravo dodatnih 128 bajtova RAM-a kojima moramo upravljati, budući da moramo kontrolirati svu memoriju korištenu za slanje i primanje podataka.
+Trenutno se TSS koristi samo za slanje paketa CD izmjenjivača kako bismo ga mogli emulirati, te za slanje zahtjeva za resetiranje stanja putnog računala. 
+Poruke CD mijenjača su poruke s neposrednim odgovorom (vidi \ref{subsec:message-types}), dok je zahtjev za resetiranje stanja putnog računala normalni okvir s zahtjevom za potvrdom (ACK). 
+Paketi CD mijenjača šalju se periodično, svake sekunde, inače će ugrađeni radio smatrati da CD mijenjač nije prisutan i onemogućiti ga.
 
 \noindent
-TSS komunicira preko SPI sučelja i malo je nezgrapan za korištenje, pa je napisan prilagođeni upravljački program radi lakšeg rukovanja. Osim toga, postoji zaseban zadatak koji nadzire stanje TSS poruka i stavlja ih u red za slanje.
+TSS komunicira preko SPI sučelja i malo je nezgrapan za korištenje, pa je napisan vlastiti upravljački program radi lakšeg rukovanja. 
+Osim toga, postoji zaseban zadatak koji nadzire stanje TSS poruka i stavlja ih u red za slanje.
 
 \subsection{UART komunikacija}
 
-Informacijsko-zabavno računalo komunicira s ESP32 preko UART sučelja. Razlog korištenja UART-a je njegova jednostavnost. ESP32 uglavnom šalje podatke računalu, ali također može primati zahtjeve s računala.
+Informacijsko-zabavno računalo komunicira s ESP32 preko UART sučelja. Razlog korištenja UART-a je njegova jednostavnost. 
+ESP32 uglavnom šalje podatke računalu, ali također može primati zahtjeve s računala.
 
 \noindent
-UART kod se izvodi u vlastitom zadatku koji prima događaje iz drugih zadataka i također može slati događaje glavnom zadatku. Kada glavna petlja (eng. \textit{Main loop}) detektira promjenu u globalnim međuspremnicima podataka (primljen VAN okvir, promjena napona baterije itd.), postavlja odgovarajući događaj u UART zadatak s podacima koji se šalju računalu. Protokol i strukture podataka su prilagođene i inspirirane MSP protokolom korištenim u programskoj podršci upravljača leta na FPV dronovima.
+UART kod se izvodi u vlastitom zadatku koji prima događaje iz drugih zadataka i također može slati događaje glavnom zadatku. 
+Kada glavna petlja (eng. \textit{Main loop}) detektira promjenu u globalnim međuspremnicima podataka (primljen VAN okvir, promjena napona baterije itd.), 
+postavlja odgovarajući događaj u UART zadatak s podacima koji se šalju računalu. 
+Protokol i strukture podataka su inspirirane MSP protokolom korištenim u programskoj podršci upravljača leta na FPV dronovima.
 
 \subsection{Upravljanje događajima i zadacima}
 
 Programska podrška koristi nekoliko zadataka koji se izvode u vlastitim petljama i čekaju događaje iz više redova. Ukupno postoje 4 globalna reda u programskoj podršci, po jedan za svaku glavnu komponentu:
 \begin{itemize}
-\item Glavni red – Čita ga glavni zadatak. Svi ostali zadaci šalju svoje događaje u red glavnog zadatka. Glavni zadatak zatim odlučuje što učiniti i gdje proslijediti događaj.
-\item TSS red – Čita ga TSS zadatak. Koristi se za stavljanje paketa u red za slanje od strane TSS-a.
-\item UART red – Čita ga UART zadatak. Koristi se za slanje paketa informacijsko-zabavnom računalu.
-\item VAN red (neiskorišteno) – Čita ga VAN RMT zadatak. Ostavljen za buduću upotrebu.
+\item Glavni red - Čita ga glavni zadatak. Svi ostali zadaci šalju svoje događaje u red glavnog zadatka. Glavni zadatak zatim odlučuje što učiniti i gdje proslijediti događaj.
+\item TSS red - Čita ga TSS zadatak. Koristi se za stavljanje paketa u red za slanje od strane TSS-a.
+\item UART red - Čita ga UART zadatak. Koristi se za slanje paketa informacijsko-zabavnom računalu.
+\item VAN red (neiskorišteno) - Čita ga VAN RMT zadatak. Ostavljen za buduću upotrebu.
 \end{itemize}
 
 \noindent
-Osim toga, postoji interni red u VAN RMT zadatku. Taj red koristi se isključivo između prekida (interrupt) RMT periferijala i VAN RMT zadatka.
+Osim toga, postoji interni red u VAN RMT zadatku. Taj red se isključivo koristi između prekida (interrupt) RMT uređaja i VAN RMT zadatka.
 
 \bigskip
 \noindent
-Događaji su definirani kao struktura (Izlistaj \ref{lst:mive_global_event}) s identifikatorom događaja (Izlistaj \ref{lst:enum-mive_global_event_t}) i pokazivačem na podatke. Podaci ovise o primljenom događaju.
+Događaji su definirani kao struktura (Kod \ref{lst:mive_global_event}) s identifikatorom događaja (Kod \ref{lst:enum-mive_global_event_t}) i pokazivačem na podatke. 
+Podaci ovise o primljenom događaju.
 
 \subsection{Upravljanje režimima napajanja}
 
-Važno je upravljati potrošnjom energije sustava. Radi lakšeg upravljanja definirali smo nekoliko „stanja vozila”. Pogledajte tablicu \ref{tbl:car-states} za popis tih stanja i ponašanje sustava. Jedna važna komponenta spomenuta u tablici je duboki režim spavanja ESP32-a (eng. \textit{deep sleep}). Kada je u dubokom snu, ESP je praktički isključen. Jedino što radi na čipu je posebni dio RAM-a, RTC periferijal i, po potrebi, ULP koprocesor. U našem slučaju koristimo isti ADC pin koji se koristi za mjerenje napona baterije kako bismo probudili ESP. Zbog naponskog raspona nožice, ne možemo koristiti jednostavano buđenje putem GPIO-a, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
+Važno je upravljati potrošnjom energije sustava. Radi lakšeg upravljanja definirali smo nekoliko „stanja vozila”. 
+Pogledajte tablicu \ref{tbl:car-states} za popis tih stanja i ponašanje sustava. 
+Jedna važna komponenta spomenuta u tablici je stanje dubokog spavanja ESP32-a (eng. \textit{deep sleep}). 
+Kada je u dubokom snu, ESP je praktički isključen. Jedino što radi na čipu je posebni dio RAM-a, unutarnji RTC sklop i, po potrebi, ULP koprocesor. 
+U našem slučaju koristimo isti ADC pin koji se koristi za mjerenje napona baterije kako bismo probudili ESP. 
+Zbog naponskog raspona nožice, ne možemo koristiti jednostavano buđenje putem GPIO-a, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
 
 \subsection{ULP koprocesor}
 
-ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i troši vrlo malo energije. Idealno je koristiti ga za ADC mjerenja i buđenje ESP-a. Ne može se programirati izravno u C-u, ali postoje dva načina pisanja koda. Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u firmware binarnu datoteku. Drugi način je korištenje unaprijed definiranih C makroa i pisanje programa u polju unutar C programa te njegovo učitavanje na taj način. Odabrali smo drugu opciju jer je znatno jednostavnija. Pogledajte Izlistaj \ref{lst:ulp-deep-sleep} za ULP kod korišten u dubokom snu.
+ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i troši vrlo malo energije. Idealno je koristiti ga za ADC mjerenja i buđenje ESP-a. 
+Ne može se programirati izravno u C-u, ali postoje dva načina pisanja koda. 
+Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u datoteku firmware-a. 
+Drugi način je korištenje unaprijed definiranih C makroa i pisanje programa u polju unutar C programa te njegovo učitavanje na taj način. 
+Odabrali smo drugu opciju jer je znatno jednostavnija. Pogledajte \ref{lst:ulp-deep-sleep} za ULP kod korišten u dubokom snu.
 
 \begin{table}[H]
   \begin{tabularx}{\textwidth} { 
@@ -138,21 +175,21 @@ ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i tro
     \textbf{Opis} & \textbf{Stanje računala} & \textbf{ESP32 stanje} \\
     \hline
     \hline
-    Auto u stanju mirovanja (switched 12V rail is off) & Ugašen (bez napajanja) & Stanje spavanja \\
+    Automobil u stanju mirovanja & Isključeno (bez napajanja) & Stanje spavanja \\
     \hline
-    Auto ugašeno i zaključano, nije u stanju mirovanja & Ugašeno & Aktivno stanje \\
+    Motor zaustavljen, automobil zaključan i nije u stanju mirovanja & Isključeno & Aktivno stanje \\
     \hline
-    Auto ugašeno, nije zaključano, nije u stanju mirovanja & If coming from states above, turned off, otherwise display off & Aktivno \\
+    Motor zaustavljen, automobil nije zaključan i nije u stanju mirovanja & Ako dolazi iz gornjih stanja, isključeno, inače samo ekran isključen & Aktivno stanje \\
     \hline
-    Auto ugašeno, radio upaljen & Upaljen, ekran upaljen & Aktivno \\
+    Motor zaustavljen, radio uključen & Uključen, ekran uključen & Aktivno stanje \\
     \hline
-    Auto ugašeno, ključ u poziciji ACC & Upaljen, ekran upaljen & Aktivno \\
+    Motor zaustavljen, ključ u poziciji ACC & Uključen, ekran uključen & Aktivno stanje \\
     \hline
-    Auto ugašeno, ključ u poziciji IGN & Upaljen, ekran upaljen & Aktivno \\
+    Motor zaustavljen, ključ u poziciji IGN & Uključen, ekran uključen & Aktivno stanje \\
     \hline
-    Auto se pali & Upaljen, ekran ugašen & Aktivno \\
+    Motor se pokreće & Uključen, ekran isključen & Aktivno stanje \\
     \hline
-    Engine running & Upaljen, ekran upaljen & Aktivno \\
+    Motor je pokrenut & Uključen, ekran uključen & Aktivno stanje \\
     \hline
   \end{tabularx}
   \caption{Tablica stanja auta}
@@ -257,5 +294,5 @@ if(ret == pdPASS)
     }
 }
   \end{minted}
-  \caption{Primjer upravljanja greškama}
+  \caption{Primjer upravljanja događajima}
 \end{listing}
