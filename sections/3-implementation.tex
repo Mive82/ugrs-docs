@@ -3,7 +3,7 @@
 \section{Realizacija Peugeot Infotainment sustava}
 \subsection{Korištene komponente, alati i programska podrška}
 % ESP32
-\paragraph{ESP32 - WROOM - C6} glavni mikroupravljač sustava. Komunicira s računalom automobila, obrađuje zaprimljene informacije te ih prosljeđuje RPi mikroupravljaču.
+\paragraph{ESP32 - WROOM32E} glavni mikroupravljač sustava. Komunicira s računalom automobila, obrađuje zaprimljene informacije te ih prosljeđuje RPi mikroupravljaču.
 % RPi
 \paragraph{RPi 4} prihvaća i obrađuje dobivene informacije od ESP mikroupravljača te ih prikazuje na ekranu.
 % RTC
@@ -13,12 +13,12 @@
 % MCP
 \paragraph{MCP2551}je integrirani strujni krug koji pretvara naponske razine logičkih razina VAN sabirnice u diferencijalni signal.
 % Level shifteri
-\paragraph{NTS0104GU12\_115}je integrirani strujni krug koji prevodi TTL signale u diferencijalni par i obrnuto.
+\paragraph{NTS0104}je integrirani strujni krug koji prevodi naponske razine signala.
 % 5V voltage reg
 \paragraph{MP8759GD1}je integrirani strujni krug koji služi kao regulator napona. U ovom konkretnom slučaju se koristi za pretvorbu napona od 12 V u 5 V.
 % 3v3 voltage reg
-\paragraph{NCP691MN33T2G} je integrirani strujni krug koji služi kao regulator napona za 3.3 V.
-\paragraph{ESP-IDF programski paket}razvijen od Espressif-a se koristi kako je prilagođen za ESP mikroupravljače.
+\paragraph{NCP691} je integrirani strujni krug koji služi kao regulator napona za 3.3 V.
+\paragraph{ESP-IDF programski paket} razvijen od Espressif-a se koristi za programiranje za ESP mikroupravljača.
 
 \subsection{Realizacija konstrukcijskog i sklopovskog rješenja}
 
@@ -52,7 +52,7 @@ Dugmad na slici \ref{fig:programming_buttons} se koriste za ručno tj. fizičko 
 \end{figure}
 
 % spojnica za programiranje
-U svrhe programiranja je kreirano poseblno sučelje koje koristi tranzistore za programiranje koji su prethodno spomenuti kako bi odabrali način rada mikroupravljača kao i UART serijski protokol za sam prijenos programskog koda. Shema sučelja je prikazana na slici \ref{fig:programming_header}.
+U svrhe programiranja je kreirano posebno sučelje koje koristi tranzistore za programiranje koji su prethodno spomenuti kako bi odabrali način rada mikroupravljača kao i UART serijski protokol za sam prijenos programskog koda. Shema sučelja je prikazana na slici \ref{fig:programming_header}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_prog_header.pdf}
@@ -71,7 +71,7 @@ Kako imamo komponente koje rade na različitim naponskim razinama, potrebno je u
 \end{figure}
 
 % sučelje za spajanje na mrežu automobila
-TSS463C je VAN upravljački integrirani krug koji se koristi za komunikaciju s sustavom automobila. Komunicira s ESP mikroupravljačem putem SPI serijskog protokola. Od periferije sadržava 8 MHz oscilator koji je neophodan za rad integriranog kruga. Sa sustavom automobila kominicira preko VAN protokola (nožice 11 i 12). Shema spoja je prikazana na slici \ref{fig:tss}. 
+TSS463C je VAN upravljački integrirani krug koji se koristi za komunikaciju sa sustavom automobila. Komunicira s ESP mikroupravljačem putem SPI serijskog protokola. Od periferije sadržava 8 MHz oscilator koji je neophodan za rad integriranog kruga. Sa sustavom automobila kominicira preko VAN protokola (nožice 11 i 12). Shema spoja je prikazana na slici \ref{fig:tss}. 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_tss.pdf}
@@ -319,7 +319,7 @@ ESP32 uglavnom šalje podatke računalu, ali također može primati zahtjeve s r
 
 \noindent
 UART kod se izvodi u vlastitom zadatku koji prima događaje iz drugih zadataka i također može slati događaje glavnom zadatku. 
-Kada glavna petlja (eng. \textit{Main loop}) detektira promjenu u globalnim međuspremnicima podataka (primljen VAN okvir, promjena napona baterije itd.), 
+Kada glavna petlja (eng. \textit{Main loop}) detektira promjenu u globalnim međuspremnicima podataka (primljen VAN okvir, promjena napona akumulatora, itd.), 
 postavlja odgovarajući događaj u UART zadatak s podacima koji se šalju računalu. 
 Protokol i strukture podataka su inspirirane MSP protokolom korištenim u programskoj podršci upravljača leta na FPV dronovima.
 
