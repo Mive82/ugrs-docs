@@ -1,44 +1,48 @@
-\section{Projekt}
+\section{Uvod}
 
-\subsection{Uvod}
+U današnje vrijeme infotainment sustavi predstavljaju ključan dio korisničkog iskustva u vozilima, jer omogućuju vozaču i putnicima pristup informacijama i multimediji na intuitivan i siguran način. Rješenja poput Android Auto, Apple CarPlay te tvorničkih rješenja renomiranih proizvođača automobila (npr. BMW iDrive, VW MIB, Tesla infotainment) postala su industrijski standard. Njihova široka rasprostranjenost proizlazi iz sposobnosti integracije funkcija poput navigacije, hands-free poziva, upravljanja glazbom i sustava vozila, čime značajno doprinose sigurnosti i udobnosti vožnje.
 
-Cilj ovog projekta bio je izraditi pristupni modul za infotainment sustav
-koji će se koristiti u vozilu Peugeot 206. Sam sustav sastoji se od dvaju glavnih dijelova:
-pristupnog modula i računala. Pristupni modul izrađen je pločica vlastitog dizajna
-temeljena na modulu ESP32 Wroom 32E. Pločica upravlja napajanjem,
-komunikacijom s vozilom te komunikacijom s računalom.
-Računalo čini Raspberry Pi 4 sa zaslonom osjetljivim na dodir
-(DSI) i prilagođenom Linux distribucijom. Ono upravlja prikazom slike i zvuka.
+Ono što ta rješenja čini korisnima jest kombinacija modernog korisničkog sučelja i snažne povezivosti s vozilom putem komunikacijskih sabirnica poput CAN-a ili FlexRaya. Standardizirani protokoli i bogata dokumentacija omogućuju proizvođačima jednostavnu implementaciju i brži razvoj. Većina sustava oslanja se na dobro dokumentirane mrežne protokole, brze procesore i modularne arhitekture koje olakšavaju nadogradnju i prilagodbu softvera. Međutim, upravo zbog toga rješenja su često zatvorenog tipa i teško ih je prilagoditi specifičnim starijim modelima automobila, osobito onima koji koriste zastarjele komunikacijske standarde.
 
-\bigskip
-\noindent
-Ovaj projekt je proširenje postojećeg završnog rada `VAN protokol i njegova primjena u automobilima' \cite{mathos-rad}.
+Kod starijih vozila, poput Peugeot 206, komunikacija se odvija preko VAN sabirnice koja je specifična za PSA grupu i slabije dokumentirana u odnosu na CAN. To predstavlja izazov za razvoj vlastitog infotainment sustava, jer je potrebno implementirati dekodiranje i generiranje VAN okvira kako bi se uspostavila dvosmjerna komunikacija. Na tržištu gotovo da i nema komercijalno dostupnih modula koji to podržavaju, što motivira razvoj prilagođenih rješenja.
 
-\begin{figure}[H]
-  \begin{center}
-    \includegraphics[width=0.75\textwidth]{images/PXL_20250530_205606724.jpg}
-    \caption{Izgled pristupnog modula sa sklopovljem za programiranje.}
-  \end{center}
-\end{figure}
+Motiv za izradu ovog projekta leži upravo u potrebi za modernizacijom starijeg vozila i dodavanjem funkcionalnosti koje se nalaze u novijim automobilima – prikaz telemetrije u stvarnom vremenu, multimedijska reprodukcija, informiranje o statusu vozila – uz zadržavanje potpune kompatibilnosti s postojećom elektronikom. Rješenje koje je ovdje predstavljeno ima za cilj stvoriti modularni i proširivi infotainment sustav temeljen na modernom mikroupravljaču i otvorenoj softverskoj platformi, čime se korisniku omogućuje funkcionalnost na razini novijih vozila, ali po pristupačnoj cijeni i uz potpunu kontrolu nad sustavom.
 
-\subsection{Glavni izazovi}
+\subsection{Zadatak i struktura rada}
 
-Ovaj projekt ima dva, možda tri glavna izazova koje treba razmotriti. 
-Najizraženiji je komunikacija s vozilom. Peugeot 206 ne koristi standardnu CAN sabirnicu, već nešto što se naziva VAN, vidi poglavlje \ref{sec:van_bus}. 
-Taj komunikacijski standard danas je zastario, jer je korišten isključivo u vozilima Peugeot i Citroën tijekom ograničenog vremenskog razdoblja. 
-Zbog toga gotovo da i ne postoji hardver koji može razumjeti taj protokol, 
-a dokumentacije je približno jednako malo, pri čemu je većina napisana na francuskom jeziku. 
-Stoga moramo izraditi vlastiti softver za primanje VAN okvira te pronaći način kako ih i slati.
+Zadatak ovog projekta bio je razviti i implementirati infotainment sustav za vozilo Peugeot 206, s naglaskom na kompatibilnost s postojećom elektroničkom infrastrukturom vozila. Glavni izazov je komunikacija putem VAN sabirnice, koja je specifična za PSA grupu i slabo dokumentirana, što zahtijeva izradu vlastitog hardverskog i softverskog rješenja za dekodiranje i generiranje poruka.
 
-\bigskip
-\noindent
-Drugi izazov odnosi se na napajanje. 
-Imamo komponente koje zahtijevaju i 5 volti i 3,3 volta, kao i dva naponska voda: trajni izvor i uključivi izvor. 
-Dodatni problem je \textbf{vrlo} šumovito i ponekad nestabilno ulazno napajanje, pa jeftini istosmjerni pretvarači (DC-DC) neće biti dovoljni.
+Cilj projekta je izraditi potpuno funkcionalan prototip koji omogućuje:
+\begin{itemize}
+  \item prikaz telemetrijskih podataka vozila u stvarnom vremenu (brzina, okretaji motora, temperatura, status goriva),
 
-\bigskip
-\noindent
-Posljednji izazov, a možda i najpodcijenjeniji, 
-jest izrada pouzdane programske podrške (eng. \textit{firmwarea}) za sam pristupni modul. 
-Modul ne treba samo analizirati VAN okvire, već mora upravljati vlastitim stanjem, pratiti stanje vozila, upravljati napajanjem i komunikacijom 
-računala, kontrolirati režime mirovanja i upravljati vlastitim niskonaponskim stanjem, te, što je najvažnije, ne smije dolaziti do pada sustava.
+  \item integraciju multimedijskih funkcija poput prikaza radijskih stanica i reprodukcije sadržaja s vanjskih uređaja,
+
+  \item stabilan i energetski učinkovit rad koji ne opterećuje akumulator vozila,
+
+  \item modularnost i mogućnost budućeg proširenja funkcionalnosti.
+\end{itemize}
+
+Očekivani rezultat projekta je pouzdan, proširiv i cjenovno pristupačan infotainment sustav temeljen na modernim mikroupravljačima i otvorenim softverskim rješenjima, koji omogućuje starijem vozilu funkcionalnosti usporedive s novijim modelima.
+
+\subsubsection{Struktura rada}
+\paragraph{Poglavlje 1 – Uvod}
+Daje pregled motivacije za projekt, opisuje specifičnosti Peugeot 206 vozila i problematiku komunikacije putem VAN sabirnice. Objašnjava zašto je potrebno izraditi vlastiti modul i što se planira postići projektom.
+
+\paragraph{Poglavlje 2 – Peugeot Infotainment sustav}
+Objašnjava teorijsku osnovu projekta. Detaljno opisuje principe rada VAN sabirnice, e-Manchester kodiranje, strukturu poruka, te način na koji su moduli u vozilu međusobno povezani. Na kraju se daje prijedlog sklopovskog i programskog rješenja.
+
+\paragraph{Poglavlje 3 – Realizacija Peugeot Infotainment sustava}
+Sadrži konkretan opis realizacije: korištene komponente, razvoj tiskane pločice, sheme i logiku povezivanja. Objašnjava kako je izvedena programska podrška – od primanja i slanja VAN okvira do upravljanja napajanjem i događajima.
+
+\paragraph{Poglavlje 4 – Testiranje i rezultati}
+Prikazuje metodologiju testiranja sustava u stvarnim uvjetima (u vozilu) te rezultate testova. Opisuje ispravnost prikaza telemetrije, rad multimedije i potvrđuje da sustav radi u skladu s očekivanjima.
+
+\paragraph{Poglavlje 5 – Programska podrška infotainment računala}
+Ukratko opisuje softver na Raspberry Pi računalu: korištenu Linux distribuciju, grafičko sučelje (Qt) i glavne funkcionalnosti koje korisnik vidi na ekranu.
+
+\paragraph{Poglavlje 6 – Zaključak i budući planovi}
+Sumira naučene lekcije, ističe glavne prednosti i izazove projekta te daje prijedloge za buduća poboljšanja (npr. integracija s tvorničkim zaslonom, dodatna optimizacija potrošnje energije).
+
+\paragraph{Literatura}
+Navodi korištene izvore, datasheetove, tehničku dokumentaciju i prethodne radove na kojima se projekt temelji.

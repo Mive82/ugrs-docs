@@ -5,6 +5,9 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage[figurename=Figure]{caption}
+\counterwithin{figure}{section}
+\usepackage[labelfont=bf]{caption}
+\counterwithin{table}{section}
 \usepackage{dirtree}
 \usepackage{float} % needed for the H option for figures
 \usepackage{subcaption}
@@ -20,6 +23,8 @@
 \usepackage{tabularx}
 \usepackage{csquotes}
 \usepackage[croatian]{babel}
+\usepackage{sectsty}
+
 
 \hypersetup{
     colorlinks=true,
@@ -42,105 +47,93 @@ linenos}
 % page geom
 \geometry{
     a4paper,
-    left=20mm,
+    left=25mm,
     right=20mm,
-    top=20mm,
-    bottom=20mm
+    top=25mm,
+    bottom=25mm
 }
 
-% \graphicspath{ {images/} }
-\linespread{1.4}
+\linespread{1.5}
 
-\setmainfont{Times New Roman}
-\setsansfont{Arial}
-\setmonofont{Courier New}
+% \setmainfont{Times New Roman}
+% \setsansfont{Arial}
+% \setmonofont{Courier New}
 
-
-% setting the background image, it works, do NOT fucking touch it
-% \backgroundsetup{scale=1, angle=0, opacity=0.15,
-% contents={\begin{tikzpicture}[remember picture, overlay] \node at ([yshift=0pt, xshift=0pt]current page.center)
-% {\includegraphics[scale=1.5]{images/logoFERIT.png}};\end{tikzpicture}}}
 
 \addbibresource{sources.bib} % The filename of the bibliography
 
 \begin{document}
+\sectionfont{
+  \fontsize{14}{16}
+  \selectfont
+}
+
+\subsectionfont{
+  \fontsize{14}{12}
+  \selectfont
+}
+
+\subsubsection{
+  \fontsize{12}{9}
+  \selectfont
+}
 \renewcommand\bibname{Literatura}
 \renewcommand{\listingscaption}{Kod}
 \selectlanguage{croatian}
 \begin{titlepage}
 
 \begin{center}
-
-\includegraphics[scale=0.6]{images/logoFERIT.png}
-
-\vspace{10mm}
-
-% \large is 12pt
-{\fontsize{9}{9}\selectfont
-  \textsc{Fakultet elektrotehnike, \\
-  računarstva i informacijskih tehnologija Osijek \\
-  (FERIT Osijek)}
-
-}
-
-\vspace{5mm}
-
-% \Large is 14.4pt
-{\bf{ Ugradbeni računalni sustavi }}
-
-\vspace{25mm}
-
-{\Huge{\bf Peugeot infotainment sustav }}\\
-\vspace{10mm}
-
+\fontsize{14}{16}
+\selectfont
+\textbf{SVEUČILIŠTE J.J. STROSSMAYER U OSIJEKU} \\
+\bigskip
+\fontsize{12}{12}
+\selectfont
+\textbf{FAKULTET ELEKTROTEHNIKE, RAČUNARSTVA I INFORMACIJSKH TEHNOLOGIJA OSIJEK}   \\
+\bigskip
+\textbf{Sveučilišni studij}  \\
+\fontsize{11}{12}
+\selectfont
+\bigskip
+\textbf{Ugradbeni računalni sustavi} \\
+\bigskip
+Profesor/mentor: \textbf{prof. dr. sc., Tomislav Keser} \\
+\fontsize{12}{12}
+\selectfont
+\bigskip
+\textbf{TEHNIČKA DOKUMENTACIJA PROJEKTA}  \\
+\fontsize{20}{16}
+\selectfont
+\bigskip
+\textbf{Peugeot infotainment sustav} \\
+\fontsize{11}{12}
+\selectfont
+\bigskip
+Mislav Milinković, Ivan Brajinović \\
+\bigskip
+Akademska godina 2024/2025 \\
+\bigskip
+Osijek, 19.09.2025. \\
 \end{center}
-
-\vspace{30mm}
-
-\begin{minipage}[t]{0.40\textwidth}
-{\Large{\bf Autor(i): \\ Mislav Milinković \\ Ivan Brajinović}}
-
-\end{minipage}
-
-\vspace{10mm}
-
-\rule[0.5cm]{15.8cm}{0.6mm}
-
-\begin{center}
-{\large{\bf \today\\}}
-{\large{\bf Akademska godina 2024/2025\\}}
-\end{center}
-
 \end{titlepage}
-
-\AddToHook{shipout/foreground}{
-  \begin{tikzpicture}[remember picture,overlay]
-    \node[rotate=0,scale=1.3,opacity=0.08] at (current page.center) {
-    \includegraphics{images/logoFERIT.png}}; 
-    \node[rotate=0,scale=2,opacity=0.02] at ([yshift=9.5cm]current page.south) {
-     % \includegraphics{images/badapple.pdf}
-    };
-  \end{tikzpicture}
-}
 
 \fontsize{12}{10}\selectfont
 %=================================
 
 \pagenumbering{gobble}
 
-\newpage
-\pagenumbering{arabic}
 
 \tableofcontents
 \newpage
 
+\newpage
+\pagenumbering{arabic}
 
 \include{sections/1-intro}
-\include{sections/2-vanbus}
-\include{sections/3-hardware}
-\include{sections/4-esp-fw}
-\include{sections/5-rpi}
-\include{sections/6-conclusion}
+\include{sections/2-theory}
+\include{sections/3-implementation}
+\include{sections/4-testing}
+\include{sections/5-conclusion}
 
 \printbibliography[heading=bibintoc, label=toc:bibliography]
 

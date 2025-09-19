@@ -1,6 +1,7 @@
 \newpage
-\section{VAN sabirnica}\label{sec:van_bus}
+\section{Peugeot Infotainment sustav}\label{sec:van_bus}
 
+\subsection{Principi i fizikalne zakonitosti}
 VAN (eng. \textit{Vehicle Area Network}) je serijska komunikacijska sabirnica koju su razvili PSA grupa (Peugeot, Citroën) i Renault kao alternativu CAN sabirnici. 
 Definirana je u ISO standardu \textbf{ISO 11519-3}. 
 Koristi isti fizički sloj kao CAN sabirnica (diferencijalni par) i identičnu metodu arbitraže na sabirnici, 
@@ -34,7 +35,7 @@ signala kraja podataka (\textbf{EOD}), signala potvrde (\textbf{ACK}) te signala
     \label{fig:van_frame_format}
 \end{table}
 
-\subsection{e-Manchester kodiranje}
+\subsubsection{e-Manchester kodiranje}
 
 Svi VAN okviri kodirani su pomoću unaprijeđenog Manchesterovog kodiranja (eng. \textit{Enhanced Manchester, e-Manchester}).
 Kod e-Manchestera, nakon slanja tri NRZ bita, četvrti bit šalje se kao Manchesterov bit.
@@ -60,7 +61,7 @@ Budući da Manchester bit zahtijeva dva vremenska intervala za prijenos, četiri
     \label{fig:manchester_bits_tss463_docs}
 \end{figure}
 
-\subsection{Poruke}
+\subsubsection{Poruke}
 
 Uređaj ili modul povezan na mrežu može biti jednog od tri tipa:
 \begin{itemize}
@@ -129,7 +130,7 @@ Ostalo (RTR, podaci i kontrolnu sumu) generira modul koji odgovara.
 \label{fig:immediate_reply_frame}
 \end{figure}
 
-\subsection{VAN mreža}
+\subsubsection{VAN mreža}
 
 Više modula možemo povezati zajedno kako bismo stvorili mrežu. 
 Također je moguće povezati više mreža i koristiti pristupni modul (eng. \textit{gateway}) za usmjeravanje podataka između mreža. 
@@ -145,6 +146,39 @@ Naš infotainment sustav bit će spojen umjesto CD mjenjača, modul broj 8415 na
     \includegraphics[width=0.75\textwidth]{images/vannetwork.pdf}
     \caption{Pregled VAN i CAN mreže u Peugeot 206 automobilu \cite{sedre}}
     \label{fig:van_can_network}
+  \end{center}
+\end{figure}
+
+Na slici \ref{fig:block_diagram_2_1} je prikazan block dijagram idejnog rješenja iz kojeg se mogu prepoznati tri dijela, kao i dio koji je centralni za ovaj projekt. Mikroupravljač je zadužen i za komunikaciju s računalom automobila, obradu dobivenih informacija te za njihov prikaz na ekranu.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{images/block_diagram_2_1.pdf}
+    \caption{Block dijagram idejnog rješenja}
+    \label{fig:block_diagram_2_1}
+  \end{center}
+\end{figure}
+
+\subsection{Pregled sklopovskog rješenja}
+
+Na slici \ref{fig:block_diagram_2_2} se nalazi prikaz osnovnog sklopovskog dijagrama sustava. Glavni dio sustava je mikroupravljač koji ima ulogu komunikacije informacija s računalom automobila te obradu i prikaz tih istih informacija na ekranu. Kako mikroupravljač ne podržava VAN protokol, potrebno je koristiti upravljačke integrirane krugove koji pružaju sučelje s protokolom koji je podržan od strane mikroupravljača. Za slučaj da se ne pronađe upravljač koji ne podržava diferencijalni VAN protokol, bit će potrebno koristiti tzv. VAN Transciever kako bi preveli TTL logiku u diferencijalni par. Također zbog dodatne funkcionalnosti prikaza vremena na ekranu, potrebno je dodati RTC integrirani krug čija je zadaća praćenje stvarnog vremena te komunikacija istog s mikroupravljačem.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{images/block_diagram_2_2.png}
+    \caption{Osnovni blok dijagram sklopovskog rješenja}
+    \label{fig:block_diagram_2_2}
+  \end{center}
+\end{figure}
+
+\subsection{Prijedlog programskog rješenja}
+Na slici \ref{fig:block_diagram_2_3} je prikazan blok dijagram programskog rješenja koji daje abstraktan uvid u moguće programsko rješenje. Glavni program bi se vrtio na mikroupravljaču ESP32 koji je odgovaran za slanje i primanje paketa na VAN mreži tj. odgovaran je za komunikaciju s računalom automobila. Nadalje, pored toga je potrebno riješiti problem upravljanja potrošnjom energije i uvijetnog paljenja sustava tj. postavljanjem dijelova sustava u aktivno stanje ili stanje mirovanja. I na kraju je potrebno dobivene informacije obraditi te prikazati na ekranu.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.75\textwidth]{images/block_diagram_2_3.png}
+    \caption{Osnovni blok dijagram programskog rješenja}
+    \label{fig:block_diagram_2_3}
   \end{center}
 \end{figure}
 

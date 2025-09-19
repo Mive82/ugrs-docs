@@ -1,0 +1,388 @@
+\newpage
+
+\section{Realizacija Peugeot Infotainment sustava}
+\subsection{Korištene komponente, alati i programska podrška}
+% ESP32
+\paragraph{ESP32 - WROOM - C6} glavni mikroupravljač sustava. Komunicira s računalom automobila, obrađuje zaprimljene informacije te ih prosljeđuje RPi mikroupravljaču.
+% RPi
+\paragraph{RPi 4} prihvaća i obrađuje dobivene informacije od ESP mikroupravljača te ih prikazuje na ekranu.
+% RTC
+\paragraph{RTC DS3231MZ} broji trenutno vrijeme koje se komunicira s RPi mikroupravljačem u svrhu prikaza istog na ekranu.
+% TSS
+\paragraph{TSS463C} integrirani strujni krug koji omogućuje jednostavno komuniciranje s VAN mrežom preko SPI sučelja. Apstrahira sam VAN protokol koji je kompleksan te ubrzava razvoj.
+% MCP
+\paragraph{MCP2551}je integrirani strujni krug koji pretvara naponske razine logičkih razina VAN sabirnice u diferencijalni signal.
+% Level shifteri
+\paragraph{NTS0104GU12\_115}je integrirani strujni krug koji prevodi TTL signale u diferencijalni par i obrnuto.
+% 5V voltage reg
+\paragraph{MP8759GD1}je integrirani strujni krug koji služi kao regulator napona. U ovom konkretnom slučaju se koristi za pretvorbu napona od 12 V u 5 V.
+% 3v3 voltage reg
+\paragraph{NCP691MN33T2G} je integrirani strujni krug koji služi kao regulator napona za 3.3 V.
+\paragraph{ESP-IDF programski paket}razvijen od Espressif-a se koristi kako je prilagođen za ESP mikroupravljače.
+
+\subsection{Realizacija konstrukcijskog i sklopovskog rješenja}
+
+% detaljna elektronična shema te detaljno objašnjenje iste
+
+% ESP
+Napaja se s 3.3 V sa stalnog izvora napajanja (\ref{fig:3v3_reg}), EN nožica je spojena preko otpornika na napon napajanja (eng. \textit{pull-up}) kako bi se omogućio rad mikroupravljača. Shema mikroupravljača je prikazana na slici \ref{fig:esp32}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/sch_esp32.pdf}
+    \caption[]{Pregled sheme - ESP32 mikroupravljač}
+    \label{fig:esp32}
+\end{figure}
+
+% dugmad za programiranje
+Prije samog procesa prijenosa koda na ESP, isti se mora postaviti u određeni način rada gdje je spreman prihvatiti programski kod. Zbog toga se koristi gumb SW2A koji kad je pritisnut dovodi nisku naponsku razinu na GPIO0 što je uvijet kod ponovnog pokretanja mikroupravljača za odlazak u spomenuti način rada. Zbog lakšeg ponovnog pokretanja, implementiran je još jedan gumb za ponovno pokretanje koji, kad se pritisne, dovede nisku naponsku razinu na EN nožicu. Shema gumbova se nalazi na slici \ref{fig:programming_buttons}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/sch_prog_buttons.pdf}
+    \caption[]{Pregled sheme - Gumbovi za programiranje}
+    \label{fig:programming_buttons}
+\end{figure}
+
+% tranzistori za programiranje
+Dugmad na slici \ref{fig:programming_buttons} se koriste za ručno tj. fizičko programiranje. Međutim, kako bi omogućili programsko programiranje tj. omogućili programiranje mikroupravljača bez fizičkog pritiskanja gumba, implementirana su dva tranzistora koji pružaju programsko upravljanje naponskih razina nožica mikroupravljača. Shema tih tranzistora je prikazana na slici \ref{fig:programming_transistors}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/sch_prog_npn.pdf}
+    \caption[]{Pregled sheme - Tranzistori za programiranje}
+    \label{fig:programming_transistors}
+\end{figure}
+
+% spojnica za programiranje
+U svrhe programiranja je kreirano poseblno sučelje koje koristi tranzistore za programiranje koji su prethodno spomenuti kako bi odabrali način rada mikroupravljača kao i UART serijski protokol za sam prijenos programskog koda. Shema sučelja je prikazana na slici \ref{fig:programming_header}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/sch_prog_header.pdf}
+    \caption[]{Pregled sheme - spojnica za programiranje}
+    \label{fig:programming_header}
+\end{figure}
+
+
+% pretvarač naponskih razina opće namjene
+Kako imamo komponente koje rade na različitim naponskim razinama, potrebno je upotrijebiti pretvarač naponskih razina kako bi se pouzdano i bez razmišljanja o pregaranju, razmjenjivale informacije između njih. Pretvarač naponskih razina na slici \ref{fig:level_shifter_A} vrši pretvorbu na signalima prekida TSS integriranog kruga te na liniji dolaznih podataka VAN sabirnice.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/sch_gp_level_shifter.pdf}
+    \caption[]{Pregled sheme - pretvarač naponskih razina A}
+    \label{fig:level_shifter_A}
+\end{figure}
+
+% sučelje za spajanje na mrežu automobila
+TSS463C je VAN upravljački integrirani krug koji se koristi za komunikaciju s sustavom automobila. Komunicira s ESP mikroupravljačem putem SPI serijskog protokola. Od periferije sadržava 8 MHz oscilator koji je neophodan za rad integriranog kruga. Sa sustavom automobila kominicira preko VAN protokola (nožice 11 i 12). Shema spoja je prikazana na slici \ref{fig:tss}. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/sch_tss.pdf}
+    \caption[]{Pregled sheme - TSS}
+    \label{fig:tss}
+\end{figure}
+
+% TSS oscilator
+Slika \ref{fig:tss_osci} pokazuje oscilator koji je spojen na TSS463C integrirani krug.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/sch_tss_osci.pdf}
+    \caption[]{Pregled sheme - TSS oscilator}
+    \label{fig:tss_osci}
+\end{figure}
+
+% TSS level shifter
+Kako TSS ne može direktno komunicirati s mikroupravljačem, između njih je postavljen pretvarač naponskih razina kako bi preveo 5 V signale od TSS-a u 3.3 V signale koje ESP očekuje. Shema spoja je prikazana na slici \ref{fig:level_shifter_B}.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{images/sch_tss_level_shifter.pdf}
+    \caption[]{Pregled sheme - Pretvarač naponskih razina B}
+    \label{fig:level_shifter_B}
+\end{figure}
+
+% TSS Reset transistor
+Kao mehanizam za ponovno pokretanje TSS integriranog kruga preko ESP mikroupravljača, ugrađen je N kanalni unipolarni tranzistor koji je spojen na nožicu za ponovno pokretanje TSS integriranog kruga. Kako je ta nožica aktivna na nisku naponsku razinu, kad je tranzistor u zasićenju, nožica se spaja na uzemljenje te se tako TSS integrirani krug ponovno pokreće.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/sch_tss_reset.pdf}
+    \caption[]{Pregled sheme - Tranzistor za ponovno pokretanje TSS-a}
+    \label{fig:tss_reset}
+\end{figure}
+
+% MCP
+Integrirani krug koji prevodi TTL signale u diferencijalni par.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/sch_mcp.pdf}
+    \caption[]{Pregled sheme - MCP}
+    \label{fig:mcp}
+\end{figure}
+
+% MCP reset transistor 
+Kao mehanizam ponovnog pokretanja MCP integriranog kruga preko ESP mikroupravljača, implementiran je n kanalni unipolarni tranzistor koji je spojen na nožicu za ponovno pokretanje MCP integriranog kruga. Kako je ta nožica aktivna na nisku naponsku razinu, kad je tranzistor u stanju zasićenja, nožica se spaja na pull-down otpornik te se tako MCP integrirani krug ponovno pokreće.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/sch_mcp_reset.pdf}
+    \caption[]{Pregled sheme - Tranzistor za ponovno pokretanje integriranog kruga MCP...}
+    \label{fig:mcp_reset}
+\end{figure}
+
+% Regulator napona stalnog izvora - direktan spoj na bateriju | potencijalno spojiti s drugim regulatorom 12 V -> 5 V
+Strujni krug je preuzet iz tehničkog lista \cite{MP8759GD1_datasheet} integriranog kruga MP8759GD1, na slici 11.Na strujnom krugu se nalazi jedna TVS dioda kako bi osigurala ulaznu nožicu od previsokog napona kao i razne vrijednosti kondenzatora čija je uloga filtriranje i peglanje oblika ulaznog napona.
+Na izlazu se nalaze isto tako kondenzatori za filtriranje i peglanje oblika izlaznog napona. 
+Kako je riječ o regulatoru napona koji nije ograničen na jednu vrijednost izlaznog napona, potrebno je odabrati željeni izlazni napon. A to je nešto što se radi na nožici 7 običnog naponskog djelila R111 i R109. Tablica s parovima vrijednosti za željene vrijednosti izlaznog napona se nalaze u tehničkom listu \cite{MP8759GD1_datasheet} na stranici 16.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/sch_5v_reg.pdf}
+    \caption[]{Pregled sheme - Regulator napona stalnih 5 V}
+    \label{fig:constant_5v_regulator}
+\end{figure}
+
+% 3v3 regulator napona
+Linearni regulator napona koji kao ulaz prima 5 V i na izlazu daje 3.3 V. Posjeduje par kondenzatora na ulazu i izlazu u svrhu filtriranja i peglanja napona.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/sch_3v3_reg.pdf}
+    \caption[]{Pregled sheme - 3.3 V regulator napona}
+    \label{fig:3v3_reg}
+\end{figure}
+
+
+% ADC za mjerenje razine napona baterije automobila
+Kako bi se mjerila razina napona baterije automobila, korišten je obični djeljitelj napona realiziran pomoću dva otpornika. Kako bi se što više ograničila struja koja ovim djeliteljem teče odabrane su vrijenosti otpornika u rasponu od stotina tisuća ohm-a. Omjer otpora koji je korišten je 4:1 tj. na nožici ESP-a će biti 1/5 napona baterije automobila.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/sch_battery_adc.pdf}
+    \caption[]{Pregled sheme - Djeljitelj napona baterije}
+    \label{fig:car_battery_voltage_divider}
+\end{figure}
+
+% sve LED za otklanjanje žohara
+% Žohari, kao neminovna pojava se ne mogu izbjeći ali se može olakšati njihov pronalzak. Iz tog razloga se koriste LE diode kao bi pomoću njih brzo i jednostavno se otkrila njihova pojava.
+LE diode za detekciju grešaka su postavljene na mnogim bitnim mjestima kako bi uprzale postupak razvoja. Svaka LED posjeduje otpornik koji ograničava struju koja prolazi kroz LED na 1 mA te se na njemu dešava preostali pad napona. \\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/sch_power_debug_led.pdf}
+    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje žohara}
+    \label{fig:debug_leds_power}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/sch_UART_debug_led.pdf}
+    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje žohara na UART sabirnici}
+    \label{fig:debug_leds_uart}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/sch_van_debug_led.pdf}
+    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje žohara na VAN sabirnici}
+    \label{fig:debug_leds_van}
+\end{figure}
+% RPi UART debug
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/sch_rpi_uart.pdf}
+    \caption[]{Pregled sheme - Shema spoja LE dioda za detekciju i otklanjanje žohara na UART sabirnici koja povezuje RPi i ESP32}
+    \label{fig:rpi}
+\end{figure}
+% RPi header
+Spojnica s 40 nožica karakteristična za RPi liniju mikroupravljača je prikazana na slici \ref{fig:rpi_header}. Preko ove spojnice se UART sabirnicom povezuju ESP i RPi. I2C sabirnica se koristi za komunikaciju RPi mikroupravljača s RTC modulom te LCD ekranom. Kao opcija su ucrtane ali ne postavljene komponente otpornika R13 i R14.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/sch_rpi_header.pdf}
+    \caption[]{Pregled sheme - Spojnica za RPi mikroupravljač}
+    \label{fig:rpi_header}
+\end{figure}
+
+% RPi RTC
+Integrirani krug DS3231MZ obnaša ulogu RTC-a. Spoj je odrađen prema naputcima iz tehničkog lista \cite{rtc_datasheet}. Nožice 1 i 3 se spajaju preko otpornika na napon napajanja kako se ne koriste, nožice 7 i 8 su spojene na I2C sabirnicu RPi mikroupravljača. Postoji stalan izvor napajanja te drugi koji je aktivan kad se auto probudi.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/sch_rpi_rtc.pdf}
+    \caption[]{Pregled sheme - Shema spoja RTC modula za RPi mikroupravljač}
+    \label{fig:rpi_rtc}
+\end{figure}
+
+
+% spojnica za LCD display
+Na slici \ref{fig:lcd_power} je prikazana JST spojnica za LCD ekran kojeg upogoni RPi. Nudi pristupne točke na I2C sabirnicu kao i izvor napajanja od 5 V.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/sch_lcd_pwr.pdf}
+    \caption[]{Pregled sheme - Spojnica za LCD ekran}
+    \label{fig:lcd_power}
+\end{figure}
+% kabal za spajanje na VAN mrežu JST -> Mini Iso Blue
+ 
+
+% mini iso blue - van komunikacija
+Na slici \ref{fig:mini_iso_blue} je JST spojnica koja omogućava spajanje na VAN mrežu automobila. 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/sch_jst_van.pdf}
+    \caption[]{Pregled sheme - Spojnica za VAN mrežu automobila}
+    \label{fig:mini_iso_blue}
+\end{figure}
+
+Na slikama \ref{fig:pcb_front} i \ref{fig:pcb_back} se nalazi izgled printane tiskane pločice koja predstavlja sklopovski dio projekta. Sve komponente se nalaze sa iste strane kako bi se olakšao i ubrzao proces lemljenja. Radi lakšeg snalaženja je svaka značajnija komponenta naznačena na slici. Oznake se manifestiraju bojama kao i pratećim tekstom. Spojnica J3 označava mjesto gdje se spaja LCD ekran, J2 označava mjesto povezivanja projekta sa mrežom auta te J7 označava mjesto sa kojeg je moguće programiranti ESP32 mikroupravljač.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/pcb_front.png}
+    \caption[]{Izgled prototipa - PCB prednja strana}
+    \label{fig:pcb_front}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.75\textwidth]{images/pcb_back.jpeg}
+    \caption[]{Izgled prototipa - PCB zadnja strana}
+    \label{fig:pcb_back}
+\end{figure}
+
+
+\bigskip
+\noindent
+% Nožice 13 do 17, koji služe za podatke i napajanje, povezani su s pristupnim modulom pomoću JST GH spojnice s 6 nožica, dok su nožice 18 do 20 spojeni na 3.5 mm zvučni kabel i povezani s Raspberry Pi-jem. Budući da konvencija imenovanja razlikuje na Slikama \ref{fig:iso_conn_pinout} i \ref{fig:jst_van_pinout}, pogledajte tablicu \ref{tbl:iso-jst-legend} za spajanje.
+
+\subsection{Realizacija programskog rješenja}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{images/block_diagram_3_3.png}
+    \caption{Blok dijagram programskog rješenja}
+    \label{fig:block_diagram_3_3}
+\end{figure}
+
+Pristupni modul je najvažniji dio ovog projekta jer se sučeljava s vozilom i odgovoran je za upravljanje napajanjem cijelog sustava. 
+Modul prima i analizira VAN okvire, organizira podatke i zatim ih prosljeđuje infotainment računalu. 
+Također obavlja i obrnuti proces: može primati podatke s infotainment računala i prenijeti odgovarajući VAN okvir na sabirnicu. 
+upravljanje napajanjem također je važan dio programske podrške, budući da prekomjerna potrošnja u stanju mirovanja brzo iscrpljuje akumulator vozila. Detaljan blok dijagram je prikazan na slici \ref{fig:block_diagram_3_3} čije objašnjenje se nalazi u nastavku.
+
+\subsubsection{Okvir i pristup}
+
+Kao program za razvoj koristimo ESP-IDF programski okvir koji pruža Espressif. 
+Okvir se temelji na operativnom sustavu FreeRTOS. Zbog prirode OS-a i programskog okruženja, programska podrška modula napisana je 
+koristeći pristup temeljen na događajima.
+
+\bigskip
+\noindent
+Koristimo sljedeće događaje kao osnovu za glavne petlje/zadatake:
+\begin{itemize}
+\item Primanje VAN okvira
+\item Primanje UART podataka s računala
+\item Promjena stanja vozila
+\item Timer događaji
+\item Glavni zadatak
+\end{itemize}
+
+\noindent
+Budući da ESP32 ima dvije jezgre, jedna je posvećena isključivo primanju i analiziranju VAN okvira, jer su oni vrlo česti i ne želimo propustiti niti jedan.
+
+\subsubsection{Primanje VAN okvira}
+
+Za primanje VAN okvira potrebno je ručno čitati i vremenski pratiti stanja RX pina. 
+Srećom, ESP32 ima sklopovski periferni uređaj koji upravo to omogućuje: RMT periferni uređaj. 
+On može pratiti stanja GPIO pinova i mjeriti koliko dugo su u tom stanju. 
+Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, periferni uređaj može generirati prekid (eng. \textit{interrupt}) 
+svaki put kada detektira sekvencu \textbf{EOF}.
+
+\noindent
+Kada se detektira sekvenca \textbf{EOF}, RMT periferijalni upravljački program generira prekid (eng. \textit{interrupt}). 
+U okviru tog prekida, u red zadataka (eng. \textit{task queue}) modula za primanje VAN okvira postavljamo novi događaj i ponovno pokrećemo RMT. 
+Modul za primanje VAN okvira preuzima primljene RMT podatke iz reda i analizira ih. 
+
+VAN okvir rekonstruiramo bit po bit iz tog polja, uzimajući u obzir Manchester bitove. 
+Nakon provjere kontrolnog zbroja (eng. \textit{checksum}), izdvajamo identifikator i podatke, 
+stavljamo ih u novi međuspremnik i postavljamo u red glavnog zadatka (eng. \textit{Main task}) za daljnju obradu. 
+Logika primanja inspirirana je Peter Pinterovom Arduino bibliotekom \cite{esp32_rmt_van} i prilagođena je arhitekturi naše programske podrške.
+
+\subsubsection{Analiza VAN okvira}
+
+Kada modul za primanje VAN okvira postavi novi događaj, glavni zadatak (eng. \textit{Main task}) 
+poziva parser paketa koji provjerava identifikator i, ako je prepoznat, analizira podatke u globalne međuspremnike 
+te postavlja odgovarajuće događaje u red glavnog zadatka ovisno o paketu koji se obrađuje. 
+Velika većina poznatih dekodiranih VAN okvira dostupna je na web stranici Petera Pintera \cite{vanbus_packets}.
+
+\subsubsection{Slanje VAN okvira}
+
+Za slanje VAN okvira prema vozilu koristimo TSS463C. 
+TSS je zapravo dodatnih 128 bajtova RAM-a kojima moramo upravljati, budući da moramo kontrolirati svu memoriju korištenu za slanje i primanje podataka.
+Trenutno se TSS koristi samo za slanje paketa CD izmjenjivača kako bismo ga mogli emulirati, te za slanje zahtjeva za resetiranje stanja putnog računala. 
+Poruke CD mijenjača su poruke s neposrednim odgovorom (vidi \ref{subsec:message-types}), dok je zahtjev za resetiranje stanja putnog računala normalni okvir s zahtjevom za potvrdom (ACK). 
+Paketi CD mijenjača šalju se periodično, svake sekunde, inače će ugrađeni radio smatrati da CD mijenjač nije prisutan i onemogućiti ga.
+
+\noindent
+TSS komunicira preko SPI sučelja i malo je nezgrapan za korištenje, pa je napisan vlastiti upravljački program radi lakšeg rukovanja. 
+Osim toga, postoji zaseban zadatak koji nadzire stanje TSS poruka i stavlja ih u red za slanje.
+
+\subsubsection{UART komunikacija}
+
+Informacijsko-zabavno računalo komunicira s ESP32 preko UART sučelja. Razlog korištenja UART-a je njegova jednostavnost. 
+ESP32 uglavnom šalje podatke računalu, ali također može primati zahtjeve s računala.
+
+\noindent
+UART kod se izvodi u vlastitom zadatku koji prima događaje iz drugih zadataka i također može slati događaje glavnom zadatku. 
+Kada glavna petlja (eng. \textit{Main loop}) detektira promjenu u globalnim međuspremnicima podataka (primljen VAN okvir, promjena napona baterije itd.), 
+postavlja odgovarajući događaj u UART zadatak s podacima koji se šalju računalu. 
+Protokol i strukture podataka su inspirirane MSP protokolom korištenim u programskoj podršci upravljača leta na FPV dronovima.
+
+\subsubsection{Upravljanje događajima i zadacima}
+
+Programska podrška koristi nekoliko zadataka koji se izvode u vlastitim petljama i čekaju događaje iz više redova. Ukupno postoje 4 globalna reda u programskoj podršci, po jedan za svaku glavnu komponentu:
+\begin{itemize}
+\item Glavni red - Čita ga glavni zadatak. Svi ostali zadaci šalju svoje događaje u red glavnog zadatka. Glavni zadatak zatim odlučuje što učiniti i gdje proslijediti događaj.
+\item TSS red - Čita ga TSS zadatak. Koristi se za stavljanje paketa u red za slanje od strane TSS-a.
+\item UART red - Čita ga UART zadatak. Koristi se za slanje paketa informacijsko-zabavnom računalu.
+\item VAN red (neiskorišteno) - Čita ga VAN RMT zadatak. Ostavljen za buduću upotrebu.
+\end{itemize}
+
+\noindent
+Osim toga, postoji interni red u VAN RMT zadatku. Taj red se isključivo koristi između prekida (interrupt) RMT uređaja i VAN RMT zadatka.
+
+\bigskip
+\noindent
+Događaji su definirani kao struktura s identifikatorom događaja i pokazivačem na podatke. Podaci ovise o primljenom događaju.
+
+\subsubsection{Upravljanje režimima napajanja}
+
+Važno je upravljati potrošnjom energije sustava. Radi lakšeg upravljanja definirali smo nekoliko „stanja vozila”. 
+Pogledajte tablicu \ref{tbl:car-states} za popis tih stanja i ponašanje sustava. 
+Jedna važna komponenta spomenuta u tablici je stanje dubokog spavanja ESP32-a (eng. \textit{deep sleep}). 
+Kada je u dubokom snu, ESP je praktički isključen. Jedino što radi na čipu je posebni dio RAM-a, unutarnji RTC sklop i, po potrebi, ULP koprocesor. 
+U našem slučaju koristimo isti ADC pin koji se koristi za mjerenje napona baterije kako bismo probudili ESP. 
+Zbog naponskog raspona nožice, ne možemo koristiti jednostavano buđenje putem GPIO-a, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
+
+\subsubsection{ULP koprocesor}
+
+ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i troši vrlo malo energije. Idealno je koristiti ga za ADC mjerenja i buđenje ESP-a. 
+Ne može se programirati izravno u C-u, ali postoje dva načina pisanja koda. 
+Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u datoteku firmware-a. 
+Drugi način je korištenje unaprijed definiranih C makroa i pisanje programa u polju unutar C programa te njegovo učitavanje na taj način. 
+Odabrali smo drugu opciju jer je znatno jednostavnija.
+
+\begin{table}[H]
+  \begin{tabularx}{\textwidth} { 
+  | >{\raggedright\arraybackslash}X 
+  | >{\raggedright\arraybackslash}X 
+  | >{\raggedright\arraybackslash}X | }
+    \hline
+    \textbf{Opis} & \textbf{Stanje računala} & \textbf{ESP32 stanje} \\
+    \hline
+    \hline
+    Automobil u stanju mirovanja & Isključeno (bez napajanja) & Stanje spavanja \\
+    \hline
+    Motor zaustavljen, automobil zaključan i nije u stanju mirovanja & Isključeno & Aktivno stanje \\
+    \hline
+    Motor zaustavljen, automobil nije zaključan i nije u stanju mirovanja & Ako dolazi iz gornjih stanja, isključeno, inače samo ekran isključen & Aktivno stanje \\
+    \hline
+    Motor zaustavljen, radio uključen & Uključen, ekran uključen & Aktivno stanje \\
+    \hline
+    Motor zaustavljen, ključ u poziciji ACC & Uključen, ekran uključen & Aktivno stanje \\
+    \hline
+    Motor zaustavljen, ključ u poziciji IGN & Uključen, ekran uključen & Aktivno stanje \\
+    \hline
+    Motor se pokreće & Uključen, ekran isključen & Aktivno stanje \\
+    \hline
+    Motor je pokrenut & Uključen, ekran uključen & Aktivno stanje \\
+    \hline
+  \end{tabularx}
+  \caption{Tablica stanja auta}
+  \label{tbl:car-states}
+\end{table}
