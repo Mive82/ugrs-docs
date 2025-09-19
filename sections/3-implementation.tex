@@ -7,7 +7,7 @@
 % RPi
 \paragraph{RPi 4} prihvaća i obrađuje dobivene informacije od ESP mikroupravljača te ih prikazuje na ekranu.
 % RTC
-\paragraph{RTC DS3231MZ} broji trenutno vrijeme koje se komunicira s RPi mikroupravljačem u svrhu prikaza istog na ekranu.
+\paragraph{RTC DS3231MZ} broji trenutačno vrijeme koje se komunicira s RPi mikroupravljačem u svrhu prikaza istog na ekranu.
 % TSS
 \paragraph{TSS463C} integrirani strujni krug koji omogućuje jednostavno komuniciranje s VAN mrežom preko SPI sučelja. Apstrahira sam VAN protokol koji je kompleksan te ubrzava razvoj.
 % MCP
@@ -34,7 +34,7 @@ Napaja se s 3.3 V sa stalnog izvora napajanja (\ref{fig:3v3_reg}), EN nožica je
 \end{figure}
 
 % dugmad za programiranje
-Prije samog procesa prijenosa koda na ESP, isti se mora postaviti u određeni način rada gdje je spreman prihvatiti programski kod. Zbog toga se koristi gumb SW2A koji kad je pritisnut dovodi nisku naponsku razinu na GPIO0 što je uvijet kod ponovnog pokretanja mikroupravljača za odlazak u spomenuti način rada. Zbog lakšeg ponovnog pokretanja, implementiran je još jedan gumb za ponovno pokretanje koji, kad se pritisne, dovede nisku naponsku razinu na EN nožicu. Shema gumbova se nalazi na slici \ref{fig:programming_buttons}.
+Prije samog procesa prijenosa koda na ESP, isti se mora postaviti u određeni način rada gdje je spreman prihvatiti programski kod. Zbog toga se koristi gumb SW2A koji kad je pritisnut dovodi nisku naponsku razinu na GPIO0 što je uvjet kod ponovnog pokretanja mikroupravljača za odlazak u spomenuti način rada. Zbog lakšeg ponovnog pokretanja, implementiran je još jedan gumb za ponovno pokretanje koji, kad se pritisne, dovede nisku naponsku razinu na EN nožicu. Shema gumbova se nalazi na slici \ref{fig:programming_buttons}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/sch_prog_buttons.pdf}
@@ -71,7 +71,7 @@ Kako imamo komponente koje rade na različitim naponskim razinama, potrebno je u
 \end{figure}
 
 % sučelje za spajanje na mrežu automobila
-TSS463C je VAN upravljački integrirani krug koji se koristi za komunikaciju sa sustavom automobila. Komunicira s ESP mikroupravljačem putem SPI serijskog protokola. Od periferije sadržava 8 MHz oscilator koji je neophodan za rad integriranog kruga. Sa sustavom automobila kominicira preko VAN protokola (nožice 11 i 12). Shema spoja je prikazana na slici \ref{fig:tss}. 
+TSS463C je VAN upravljački integrirani krug koji se koristi za komunikaciju sa sustavom automobila. Komunicira s ESP mikroupravljačem putem SPI serijskog protokola. Od periferije sadržava 8 MHz oscilator koji je neophodan za rad integriranog kruga. Sa sustavom automobila komunicira preko VAN protokola (nožice 11 i 12). Shema spoja je prikazana na slici \ref{fig:tss}. 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_tss.pdf}
@@ -146,33 +146,33 @@ Linearni regulator napona koji kao ulaz prima 5 V i na izlazu daje 3.3 V. Posjed
 
 
 % ADC za mjerenje razine napona baterije automobila
-Kako bi se mjerila razina napona baterije automobila, korišten je obični djeljitelj napona realiziran pomoću dva otpornika. Kako bi se što više ograničila struja koja ovim djeliteljem teče odabrane su vrijenosti otpornika u rasponu od stotina tisuća ohm-a. Omjer otpora koji je korišten je 4:1 tj. na nožici ESP-a će biti 1/5 napona baterije automobila.
+Kako bi se mjerila razina napona baterije automobila, korišten je obični djelitelj napona realiziran s pomoću dva otpornika. Kako bi se što više ograničila struja koja ovim djeliteljem teče odabrane su vrijednosti otpornika u rasponu od stotina tisuća ohma. Omjer otpora koji je korišten je 4:1 tj. na nožici ESP-a će biti 1/5 napona baterije automobila.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/sch_battery_adc.pdf}
-    \caption[]{Pregled sheme - Djeljitelj napona baterije}
+    \caption[]{Pregled sheme - Djelitelj napona baterije}
     \label{fig:car_battery_voltage_divider}
 \end{figure}
 
 % sve LED za otklanjanje žohara
 % Žohari, kao neminovna pojava se ne mogu izbjeći ali se može olakšati njihov pronalzak. Iz tog razloga se koriste LE diode kao bi pomoću njih brzo i jednostavno se otkrila njihova pojava.
-LE diode za detekciju grešaka su postavljene na mnogim bitnim mjestima kako bi uprzale postupak razvoja. Svaka LED posjeduje otpornik koji ograničava struju koja prolazi kroz LED na 1 mA te se na njemu dešava preostali pad napona. \\
+LE diode za detekciju grešaka su postavljene na mnogim bitnim mjestima kako bi ubrzale postupak razvoja. Svaka LED posjeduje otpornik koji ograničava struju koja prolazi kroz LED na 1 mA te se na njemu dešava preostali pad napona. \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\textwidth]{images/sch_power_debug_led.pdf}
-    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje žohara}
+    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje grešaka}
     \label{fig:debug_leds_power}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{images/sch_UART_debug_led.pdf}
-    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje žohara na UART sabirnici}
+    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje grešaka na UART sabirnici}
     \label{fig:debug_leds_uart}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/sch_van_debug_led.pdf}
-    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje žohara na VAN sabirnici}
+    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje grešaka na VAN sabirnici}
     \label{fig:debug_leds_van}
 \end{figure}
 % RPi UART debug
@@ -221,7 +221,7 @@ Na slici \ref{fig:mini_iso_blue} je JST spojnica koja omogućava spajanje na VAN
     \label{fig:mini_iso_blue}
 \end{figure}
 
-Na slikama \ref{fig:pcb_front} i \ref{fig:pcb_back} se nalazi izgled printane tiskane pločice koja predstavlja sklopovski dio projekta. Sve komponente se nalaze sa iste strane kako bi se olakšao i ubrzao proces lemljenja. Radi lakšeg snalaženja je svaka značajnija komponenta naznačena na slici. Oznake se manifestiraju bojama kao i pratećim tekstom. Spojnica J3 označava mjesto gdje se spaja LCD ekran, J2 označava mjesto povezivanja projekta sa mrežom auta te J7 označava mjesto sa kojeg je moguće programiranti ESP32 mikroupravljač.
+Na slikama \ref{fig:pcb_front} i \ref{fig:pcb_back} se nalazi izgled printane tiskane pločice koja predstavlja sklopovski dio projekta. Sve komponente se nalaze s iste strane kako bi se olakšao i ubrzao proces lemljenja. Radi lakšeg snalaženja je svaka značajnija komponenta naznačena na slici. Oznake se manifestiraju bojama kao i pratećim tekstom. Spojnica J3 označava mjesto gdje se spaja LCD ekran, J2 označava mjesto povezivanja projekta s mrežom auta te J7 označava mjesto s kojeg je moguće programirati ESP32 mikroupravljač.
 
 \begin{figure}[H]
     \centering
@@ -239,7 +239,7 @@ Na slikama \ref{fig:pcb_front} i \ref{fig:pcb_back} se nalazi izgled printane ti
 
 \bigskip
 \noindent
-% Nožice 13 do 17, koji služe za podatke i napajanje, povezani su s pristupnim modulom pomoću JST GH spojnice s 6 nožica, dok su nožice 18 do 20 spojeni na 3.5 mm zvučni kabel i povezani s Raspberry Pi-jem. Budući da konvencija imenovanja razlikuje na Slikama \ref{fig:iso_conn_pinout} i \ref{fig:jst_van_pinout}, pogledajte tablicu \ref{tbl:iso-jst-legend} za spajanje.
+
 
 \subsection{Realizacija programskog rješenja}
 
@@ -284,7 +284,7 @@ Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, perifern
 svaki put kada detektira sekvencu \textbf{EOF}.
 
 \noindent
-Kada se detektira sekvenca \textbf{EOF}, RMT periferijalni upravljački program generira prekid (eng. \textit{interrupt}). 
+Kada se detektira sekvenca \textbf{EOF}, RMT periferalni upravljački program generira prekid (eng. \textit{interrupt}). 
 U okviru tog prekida, u red zadataka (eng. \textit{task queue}) modula za primanje VAN okvira postavljamo novi događaj i ponovno pokrećemo RMT. 
 Modul za primanje VAN okvira preuzima primljene RMT podatke iz reda i analizira ih. 
 
@@ -304,9 +304,9 @@ Velika većina poznatih dekodiranih VAN okvira dostupna je na web stranici Peter
 
 Za slanje VAN okvira prema vozilu koristimo TSS463C. 
 TSS je zapravo dodatnih 128 bajtova RAM-a kojima moramo upravljati, budući da moramo kontrolirati svu memoriju korištenu za slanje i primanje podataka.
-Trenutno se TSS koristi samo za slanje paketa CD izmjenjivača kako bismo ga mogli emulirati, te za slanje zahtjeva za resetiranje stanja putnog računala. 
-Poruke CD mijenjača su poruke s neposrednim odgovorom (vidi \ref{subsec:message-types}), dok je zahtjev za resetiranje stanja putnog računala normalni okvir s zahtjevom za potvrdom (ACK). 
-Paketi CD mijenjača šalju se periodično, svake sekunde, inače će ugrađeni radio smatrati da CD mijenjač nije prisutan i onemogućiti ga.
+Trenutačno se TSS koristi samo za slanje paketa CD izmjenjivača kako bismo ga mogli emulirati, te za slanje zahtjeva za resetiranje stanja putnog računala. 
+Poruke CD mjenjača su poruke s neposrednim odgovorom (vidi \ref{subsec:message-types}), dok je zahtjev za resetiranje stanja putnog računala normalni okvir s zahtjevom za potvrdom (ACK). 
+Paketi CD mjenjača šalju se periodično, svake sekunde, inače će ugrađeni radio smatrati da CD mjenjača nije prisutan i onemogućiti ga.
 
 \noindent
 TSS komunicira preko SPI sučelja i malo je nezgrapan za korištenje, pa je napisan vlastiti upravljački program radi lakšeg rukovanja. 
@@ -347,13 +347,13 @@ Pogledajte tablicu \ref{tbl:car-states} za popis tih stanja i ponašanje sustava
 Jedna važna komponenta spomenuta u tablici je stanje dubokog spavanja ESP32-a (eng. \textit{deep sleep}). 
 Kada je u dubokom snu, ESP je praktički isključen. Jedino što radi na čipu je posebni dio RAM-a, unutarnji RTC sklop i, po potrebi, ULP koprocesor. 
 U našem slučaju koristimo isti ADC pin koji se koristi za mjerenje napona baterije kako bismo probudili ESP. 
-Zbog naponskog raspona nožice, ne možemo koristiti jednostavano buđenje putem GPIO-a, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
+Zbog naponskog raspona nožice, ne možemo koristiti jednostavno buđenje putem GPIO-a, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
 
 \subsubsection{ULP koprocesor}
 
 ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i troši vrlo malo energije. Idealno je koristiti ga za ADC mjerenja i buđenje ESP-a. 
 Ne može se programirati izravno u C-u, ali postoje dva načina pisanja koda. 
-Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u datoteku firmware-a. 
+Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u datoteku firmwarea. 
 Drugi način je korištenje unaprijed definiranih C makroa i pisanje programa u polju unutar C programa te njegovo učitavanje na taj način. 
 Odabrali smo drugu opciju jer je znatno jednostavnija.
 

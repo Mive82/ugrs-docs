@@ -37,7 +37,7 @@ signala kraja podataka (\textbf{EOD}), signala potvrde (\textbf{ACK}) te signala
 
 \subsubsection{e-Manchester kodiranje}
 
-Svi VAN okviri kodirani su pomoću unaprijeđenog Manchesterovog kodiranja (eng. \textit{Enhanced Manchester, e-Manchester}).
+Svi VAN okviri kodirani s pomoću unaprijeđenog Manchesterovog kodiranja (eng. \textit{Enhanced Manchester, e-Manchester}).
 Kod e-Manchestera, nakon slanja tri NRZ bita, četvrti bit šalje se kao Manchesterov bit.
 Slanje podataka na ovaj način omogućuje lakšu sinkronizaciju na sabirnici. 
 Ovo je predvidljivija metoda ubacivanja bitova (eng. \textit{bit-stuffing}) u usporedbi s metodom korištenom na CAN sabirnici.
@@ -45,12 +45,12 @@ Ovo je predvidljivija metoda ubacivanja bitova (eng. \textit{bit-stuffing}) u us
 \bigskip
 \noindent
 U Tablici \ref{fig:van_frame_format} prikazan je broj bitova za svaki dio okvira, kao i broj vremenskih intervala (eng. \textit{Time Slots}, TS). 
-Budući da Manchester bit zahtijeva dva vremenska intervala za prijenos, četiri bita u nizu kodirana e-Manchester metodom prenose se u 3 + 2 vremenska intervala.
+Budući da Manchester bit zahtjeva dva vremenska intervala za prijenos, četiri bita u nizu kodirana e-Manchester metodom prenose se u 3 + 2 vremenska intervala.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/mux1-eman.pdf}
-    \caption[]{e-Mancherster kodiranje \cite{mux1}}
+    \caption[]{e-Manchester kodiranje \cite{mux1}}
     \label{fig:manchester_bits_mux1}
 \end{figure}
 
@@ -67,7 +67,7 @@ Uređaj ili modul povezan na mrežu može biti jednog od tri tipa:
 \begin{itemize}
   \item Autonomni modul - glavni uređaj sabirnice. Može slati \textbf{SOF} niz, započeti prijenos podataka i primati poruke.
   \item Modul sa sinkronim pristupom - ne može slati \textbf{SOF} niz, ali može započeti prijenos podataka i primati poruke.
-  \item Podređeni modul (eng. \textit{Slave}) - može slati poruke samo pomoću odgovora unutar okvira (eng. \textit{in-frame}) i također može primati poruke.
+  \item Podređeni modul (eng. \textit{Slave}) - može slati poruke samo s pomoću odgovora unutar okvira (eng. \textit{in-frame}) i također može primati poruke.
 \end{itemize}
 
 \begin{figure}
@@ -78,7 +78,7 @@ Uređaj ili modul povezan na mrežu može biti jednog od tri tipa:
 \end{figure}
 
 \noindent
-VAN protokol podržava više tipova poruka. Razlikuju se pomoću polja identifikatora (\textbf{IDEN}) i naredbe (\textbf{COM}). Identifikator je dug 12 bita i slijedi ga 4 bita naredbe. Zbog načina na koji funkcionira arbitraža na sabirnici, manji identifikator ima prednost na sabirnici. Dok je vrijednost identifikatora potpuno proizvoljna, bitovi naredbe su strogo definirani i određuju tip poruke koja će se poslati na sabirnici:
+VAN protokol podržava više tipova poruka. Razlikuju se s pomoću polja identifikatora (\textbf{IDEN}) i naredbe (\textbf{COM}). Identifikator je dug 12 bita i slijedi ga 4 bita naredbe. Zbog načina na koji funkcionira arbitraža na sabirnici, manji identifikator ima prednost na sabirnici. Dok je vrijednost identifikatora potpuno proizvoljna, bitovi naredbe su strogo definirani i određuju tip poruke koja će se poslati na sabirnici:
 
 \begin{itemize}
   \item EXT - uvijek 1
@@ -104,7 +104,7 @@ U slučaju da se potvrda ne traži, poruka se tretira kao poruka za emitiranje (
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/normalframe_ack.pdf}
-    \caption{Prijenos normalnog okvira sa ACK, \cite{tss463c_datasheet}}
+    \caption{Prijenos normalnog okvira s ACK, \cite{tss463c_datasheet}}
     \label{fig:normal_frame_ack}
 \end{figure}
 
@@ -115,7 +115,7 @@ U slučaju da se potvrda ne traži, poruka se tretira kao poruka za emitiranje (
     \label{fig:normal_frame_noack}
 \end{figure}
 
-\paragraph{Zahtjev sa trenutnim odgovorom}
+\paragraph{Zahtjev s trenutačnim odgovorom}
 \label{p:immediate-reply}
 
 Ovo je jedini okvir u kojem podređeni modul (eng. \textit{slave}) može slati podatke. 
@@ -126,7 +126,7 @@ Ostalo (RTR, podaci i kontrolnu sumu) generira modul koji odgovara.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{images/immediate_reply.pdf}
-\caption{Ilustracija prijenosa zahtjeva sa trenutnim odgovorom, \cite{tss463c_datasheet}}
+\caption{Ilustracija prijenosa zahtjeva s trenutačnim odgovorom, \cite{tss463c_datasheet}}
 \label{fig:immediate_reply_frame}
 \end{figure}
 
@@ -161,7 +161,7 @@ Na slici \ref{fig:block_diagram_2_1} je prikazan block dijagram idejnog rješenj
 
 \subsection{Pregled sklopovskog rješenja}
 
-Na slici \ref{fig:block_diagram_2_2} se nalazi prikaz osnovnog sklopovskog dijagrama sustava. Glavni dio sustava je mikroupravljač koji ima ulogu komunikacije informacija s računalom automobila te obradu i prikaz tih istih informacija na ekranu. Kako mikroupravljač ne podržava VAN protokol, potrebno je koristiti upravljačke integrirane krugove koji pružaju sučelje s protokolom koji je podržan od strane mikroupravljača. Za slučaj da se ne pronađe upravljač koji ne podržava diferencijalni VAN protokol, bit će potrebno koristiti tzv. VAN Transciever kako bi preveli TTL logiku u diferencijalni par. Također zbog dodatne funkcionalnosti prikaza vremena na ekranu, potrebno je dodati RTC integrirani krug čija je zadaća praćenje stvarnog vremena te komunikacija istog s mikroupravljačem.
+Na slici \ref{fig:block_diagram_2_2} se nalazi prikaz osnovnog sklopovskog dijagrama sustava. Glavni dio sustava je mikroupravljač koji ima ulogu komunikacije informacija s računalom automobila te obradu i prikaz tih istih informacija na ekranu. Kako mikroupravljač ne podržava VAN protokol, potrebno je koristiti upravljačke integrirane krugove koji pružaju sučelje s protokolom koji je podržan od strane mikroupravljača. Za slučaj da se ne pronađe upravljač koji ne podržava diferencijalni VAN protokol, bit će potrebno koristiti tzv. VAN Transceiver kako bi preveli TTL logiku u diferencijalni par. Također zbog dodatne funkcionalnosti prikaza vremena na ekranu, potrebno je dodati RTC integrirani krug čija je zadaća praćenje stvarnog vremena te komunikacija istog s mikroupravljačem.
 
 \begin{figure}[H]
   \begin{center}
@@ -172,7 +172,7 @@ Na slici \ref{fig:block_diagram_2_2} se nalazi prikaz osnovnog sklopovskog dijag
 \end{figure}
 
 \subsection{Prijedlog programskog rješenja}
-Na slici \ref{fig:block_diagram_2_3} je prikazan blok dijagram programskog rješenja koji daje abstraktan uvid u moguće programsko rješenje. Glavni program bi se vrtio na mikroupravljaču ESP32 koji je odgovaran za slanje i primanje paketa na VAN mreži tj. odgovaran je za komunikaciju s računalom automobila. Nadalje, pored toga je potrebno riješiti problem upravljanja potrošnjom energije i uvijetnog paljenja sustava tj. postavljanjem dijelova sustava u aktivno stanje ili stanje mirovanja. I na kraju je potrebno dobivene informacije obraditi te prikazati na ekranu.
+Na slici \ref{fig:block_diagram_2_3} je prikazan blok dijagram programskog rješenja koji daje apstraktan uvid u moguće programsko rješenje. Glavni program bi se vrtio na mikroupravljaču ESP32 koji je odgovaran za slanje i primanje paketa na VAN mreži tj. odgovaran je za komunikaciju s računalom automobila. Nadalje, pored toga je potrebno riješiti problem upravljanja potrošnjom energije i uvjetnog paljenja sustava tj. postavljanjem dijelova sustava u aktivno stanje ili stanje mirovanja. I na kraju je potrebno dobivene informacije obraditi te prikazati na ekranu.
 
 \begin{figure}[H]
   \begin{center}
