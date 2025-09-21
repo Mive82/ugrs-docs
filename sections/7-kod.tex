@@ -1,0 +1,159 @@
+% Nisam siguran jel ovo treba bit numerirano ili ne
+\section*{Prilozi i dodaci}
+\addcontentsline{toc}{section}{Prilozi i dodaci}
+
+\subsubsection*{P.1 Kompletna shema sklopovlja}
+
+\includepdf[landscape=true,pages={-}]{images/izlaz.pdf}
+
+\subsubsection*{P.2 Kompletan izvorni kod firmware-a na ESP32.}
+
+\begin{code}
+    \captionof{listing}{main.c}
+    \inputminted[breaklines]{C}{kod/main.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{common.c}
+    \inputminted[breaklines]{C}{kod/common.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{init.c}
+    \inputminted[breaklines]{C}{kod/init.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{psa\_helper.c}
+    \inputminted[breaklines]{C}{kod/psa_helper.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{tss\_task.c}
+    \inputminted[breaklines]{C}{kod/tss_task.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{tss463c.c}
+    \inputminted[breaklines]{C}{kod/tss463c.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{uart\_task.c}
+    \inputminted[breaklines]{C}{kod/uart_task.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{van\_packet\_parser.c}
+    \inputminted[breaklines]{C}{kod/van_packet_parser.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{van\_rmt\_rx.c}
+    \inputminted[breaklines]{C}{kod/van_rmt_rx.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{van\_rmt\_task.c}
+    \inputminted[breaklines]{C}{kod/van_rmt_task.c}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/global\_config.h}
+    \inputminted[breaklines]{C}{kod/include/global_config.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/global\_init.h}
+    \inputminted[breaklines]{C}{kod/include/global_init.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/global\_state\_def.h}
+    \inputminted[breaklines]{C}{kod/include/global_state_def.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/global\_tasks.h}
+    \inputminted[breaklines]{C}{kod/include/global_tasks.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/mive/common.h}
+    \inputminted[breaklines]{C}{kod/include/mive/common.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/mive/psa\_helper.h}
+    \inputminted[breaklines]{C}{kod/include/mive/psa_helper.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/mive/psa\_packet\_defs.h}
+    \inputminted[breaklines]{C}{kod/include/mive/psa_packet_defs.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van/tss463\_regs.h}
+    \inputminted[breaklines]{C}{kod/include/van/tss463_regs.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van/tss463c.h}
+    \inputminted[breaklines]{C}{kod/include/van/tss463c.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van/van\_packet\_iden.h}
+    \inputminted[breaklines]{C}{kod/include/van/van_packet_iden.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van/van\_packet\_parser.h}
+    \inputminted[breaklines]{C}{kod/include/van/van_packet_parser.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van/van\_rmt\_rx.h}
+    \inputminted[breaklines]{C}{kod/include/van/van_rmt_rx.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_car\_status\_structs.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_car_status_structs.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_cd\_changer\_commands\_struct.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_cd_changer_commands_struct.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_radio\_settings\_struct.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_radio_settings_struct.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_rpm\_struct.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_rpm_struct.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_cdc\_emulator\_structs.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_cdc_emulator_structs.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_dash\_struct.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_dash_struct.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_radio\_struct.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_radio_struct.h}
+\end{code}
+
+\begin{code}
+    \captionof{listing}{include/van\_structs/van\_trip\_computer\_struct.h}
+    \inputminted[breaklines]{C}{kod/include/van_structs/van_trip_computer_struct.h}
+\end{code}

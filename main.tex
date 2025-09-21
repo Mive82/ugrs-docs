@@ -25,7 +25,9 @@
 \usepackage[croatian]{babel}
 \usepackage{sectsty}
 \usepackage{mdframed}
+\usepackage{pdfpages}
 
+\definecolor{LightGray}{gray}{0.9}
 
 \hypersetup{
     colorlinks=true,
@@ -44,6 +46,7 @@ linenos}
 framesep=2mm,
 baselinestretch=1.0,
 fontsize=\footnotesize,
+bgcolor=LightGray,
 linenos}
 % page geom
 \geometry{
@@ -80,6 +83,7 @@ linenos}
 }
 \renewcommand\bibname{Literatura}
 \renewcommand{\listingscaption}{Kod}
+\newenvironment{code}{\captionsetup{type=listing}}{}
 \selectlanguage{croatian}
 \begin{titlepage}
 
@@ -143,6 +147,8 @@ Akademska godina 2024/2025
 
 \pagenumbering{gobble}
 
+% Maksimalna dubina 2
+\setcounter{tocdepth}{2}
 
 \tableofcontents
 \newpage
@@ -156,6 +162,10 @@ Akademska godina 2024/2025
 \include{sections/4-testing}
 \include{sections/5-conclusion}
 
+% Ne treba biti numerirano
 \printbibliography[heading=bibintoc, label=toc:bibliography]
+
+% Ovo treba pun kurac da se builda, zakomentiraj ako smeta
+\include{sections/7-kod}
 
 \end{document}
