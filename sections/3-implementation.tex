@@ -1,6 +1,6 @@
 \newpage
 
-\section{Realizacija Peugeot Infotainment sustava}
+\section{REALIZACIJA PEUGEOT INFOTAINMENT SUSTAVA}
 \subsection{Korištene komponente, alati i programska podrška}
 % ESP32
 \paragraph{ESP32 - WROOM32E} glavni mikroupravljač sustava. Komunicira s računalom automobila, obrađuje zaprimljene informacije te ih prosljeđuje RPi mikroupravljaču.
@@ -29,7 +29,7 @@ Napaja se s 3.3 V sa stalnog izvora napajanja (\ref{fig:3v3_reg}), EN nožica je
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\textwidth]{images/sch_esp32.pdf}
-    \caption[]{Pregled sheme - ESP32 mikroupravljač}
+    \caption{\textit{Pregled sheme - ESP32 mikroupravljač}}
     \label{fig:esp32}
 \end{figure}
 
@@ -38,7 +38,7 @@ Prije samog procesa prijenosa koda na ESP, isti se mora postaviti u određeni na
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/sch_prog_buttons.pdf}
-    \caption[]{Pregled sheme - Gumbovi za programiranje}
+    \caption{\textit{Pregled sheme - Gumbovi za programiranje}}
     \label{fig:programming_buttons}
 \end{figure}
 
@@ -47,7 +47,7 @@ Dugmad na slici \ref{fig:programming_buttons} se koriste za ručno tj. fizičko 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\textwidth]{images/sch_prog_npn.pdf}
-    \caption[]{Pregled sheme - Tranzistori za programiranje}
+    \caption{\textit{Pregled sheme - Tranzistori za programiranje}}
     \label{fig:programming_transistors}
 \end{figure}
 
@@ -56,7 +56,7 @@ U svrhe programiranja je kreirano posebno sučelje koje koristi tranzistore za p
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_prog_header.pdf}
-    \caption[]{Pregled sheme - spojnica za programiranje}
+    \caption{\textit{Pregled sheme - spojnica za programiranje}}
     \label{fig:programming_header}
 \end{figure}
 
@@ -66,7 +66,7 @@ Kako imamo komponente koje rade na različitim naponskim razinama, potrebno je u
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/sch_gp_level_shifter.pdf}
-    \caption[]{Pregled sheme - pretvarač naponskih razina A}
+    \caption{\textit{Pregled sheme - pretvarač naponskih razina A}}
     \label{fig:level_shifter_A}
 \end{figure}
 
@@ -75,7 +75,7 @@ TSS463C je VAN upravljački integrirani krug koji se koristi za komunikaciju sa 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_tss.pdf}
-    \caption[]{Pregled sheme - TSS}
+    \caption{\textit{Pregled sheme - TSS}}
     \label{fig:tss}
 \end{figure}
 
@@ -84,7 +84,7 @@ Slika \ref{fig:tss_osci} pokazuje oscilator koji je spojen na TSS463C integriran
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\textwidth]{images/sch_tss_osci.pdf}
-    \caption[]{Pregled sheme - TSS oscilator}
+    \caption{\textit{Pregled sheme - TSS oscilator}}
     \label{fig:tss_osci}
 \end{figure}
 
@@ -93,7 +93,7 @@ Kako TSS ne može direktno komunicirati s mikroupravljačem, između njih je pos
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.85\textwidth]{images/sch_tss_level_shifter.pdf}
-    \caption[]{Pregled sheme - Pretvarač naponskih razina B}
+    \caption{\textit{Pregled sheme - Pretvarač naponskih razina B}}
     \label{fig:level_shifter_B}
 \end{figure}
 
@@ -102,7 +102,7 @@ Kao mehanizam za ponovno pokretanje TSS integriranog kruga preko ESP mikroupravl
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.6\textwidth]{images/sch_tss_reset.pdf}
-    \caption[]{Pregled sheme - Tranzistor za ponovno pokretanje TSS-a}
+    \caption{\textit{Pregled sheme - Tranzistor za ponovno pokretanje TSS-a}}
     \label{fig:tss_reset}
 \end{figure}
 
@@ -111,7 +111,7 @@ Integrirani krug koji prevodi TTL signale u diferencijalni par.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/sch_mcp.pdf}
-    \caption[]{Pregled sheme - MCP}
+    \caption{\textit{Pregled sheme - MCP}}
     \label{fig:mcp}
 \end{figure}
 
@@ -120,7 +120,7 @@ Kao mehanizam ponovnog pokretanja MCP integriranog kruga preko ESP mikroupravlja
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.65\textwidth]{images/sch_mcp_reset.pdf}
-    \caption[]{Pregled sheme - Tranzistor za ponovno pokretanje integriranog kruga MCP...}
+    \caption{\textit{Pregled sheme - Tranzistor za ponovno pokretanje integriranog kruga MCP...}}
     \label{fig:mcp_reset}
 \end{figure}
 
@@ -131,7 +131,7 @@ Kako je riječ o regulatoru napona koji nije ograničen na jednu vrijednost izla
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{images/sch_5v_reg.pdf}
-    \caption[]{Pregled sheme - Regulator napona stalnih 5 V}
+    \caption{\textit{Pregled sheme - Regulator napona stalnih 5 V}}
     \label{fig:constant_5v_regulator}
 \end{figure}
 
@@ -140,7 +140,7 @@ Linearni regulator napona koji kao ulaz prima 5 V i na izlazu daje 3.3 V. Posjed
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.9\textwidth]{images/sch_3v3_reg.pdf}
-    \caption[]{Pregled sheme - 3.3 V regulator napona}
+    \caption{\textit{Pregled sheme - 3.3 V regulator napona}}
     \label{fig:3v3_reg}
 \end{figure}
 
@@ -150,7 +150,7 @@ Kako bi se mjerila razina napona baterije automobila, korišten je obični djeli
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/sch_battery_adc.pdf}
-    \caption[]{Pregled sheme - Djelitelj napona baterije}
+    \caption{\textit{Pregled sheme - Djelitelj napona baterije}}
     \label{fig:car_battery_voltage_divider}
 \end{figure}
 
@@ -160,26 +160,26 @@ LE diode za detekciju grešaka su postavljene na mnogim bitnim mjestima kako bi 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.55\textwidth]{images/sch_power_debug_led.pdf}
-    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje grešaka}
+    \caption{\textit{Pregled sheme - LE diode za detekciju i otklanjanje grešaka}}
     \label{fig:debug_leds_power}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{images/sch_UART_debug_led.pdf}
-    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje grešaka na UART sabirnici}
+    \caption{\textit{Pregled sheme - LE diode za detekciju i otklanjanje grešaka na UART sabirnici}}
     \label{fig:debug_leds_uart}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/sch_van_debug_led.pdf}
-    \caption[]{Pregled sheme - LE diode za detekciju i otklanjanje grešaka na VAN sabirnici}
+    \caption{\textit{Pregled sheme - LE diode za detekciju i otklanjanje grešaka na VAN sabirnici}}
     \label{fig:debug_leds_van}
 \end{figure}
 % RPi UART debug
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.4\textwidth]{images/sch_rpi_uart.pdf}
-    \caption[]{Pregled sheme - Shema spoja LE dioda za detekciju i otklanjanje žohara na UART sabirnici koja povezuje RPi i ESP32}
+    \caption{\textit{Pregled sheme - Shema spoja LE dioda za detekciju i otklanjanje žohara na UART sabirnici koja povezuje RPi i ESP32}}
     \label{fig:rpi}
 \end{figure}
 % RPi header
@@ -187,7 +187,7 @@ Spojnica s 40 nožica karakteristična za RPi liniju mikroupravljača je prikaza
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{images/sch_rpi_header.pdf}
-    \caption[]{Pregled sheme - Spojnica za RPi mikroupravljač}
+    \caption{\textit{Pregled sheme - Spojnica za RPi mikroupravljač}}
     \label{fig:rpi_header}
 \end{figure}
 
@@ -196,7 +196,7 @@ Integrirani krug DS3231MZ obnaša ulogu RTC-a. Spoj je odrađen prema naputcima 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_rpi_rtc.pdf}
-    \caption[]{Pregled sheme - Shema spoja RTC modula za RPi mikroupravljač}
+    \caption{\textit{Pregled sheme - Shema spoja RTC modula za RPi mikroupravljač}}
     \label{fig:rpi_rtc}
 \end{figure}
 
@@ -206,7 +206,7 @@ Na slici \ref{fig:lcd_power} je prikazana JST spojnica za LCD ekran kojeg upogon
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_lcd_pwr.pdf}
-    \caption[]{Pregled sheme - Spojnica za LCD ekran}
+    \caption{\textit{Pregled sheme - Spojnica za LCD ekran}}
     \label{fig:lcd_power}
 \end{figure}
 % kabal za spajanje na VAN mrežu JST -> Mini Iso Blue
@@ -217,7 +217,7 @@ Na slici \ref{fig:mini_iso_blue} je JST spojnica koja omogućava spajanje na VAN
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/sch_jst_van.pdf}
-    \caption[]{Pregled sheme - Spojnica za VAN mrežu automobila}
+    \caption{\textit{Pregled sheme - Spojnica za VAN mrežu automobila}}
     \label{fig:mini_iso_blue}
 \end{figure}
 
@@ -226,13 +226,13 @@ Na slikama \ref{fig:pcb_front} i \ref{fig:pcb_back} se nalazi izgled printane ti
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/pcb_front.png}
-    \caption[]{Izgled prototipa - PCB prednja strana}
+    \caption{\textit{Izgled prototipa - PCB prednja strana}}
     \label{fig:pcb_front}
 \end{figure}
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/pcb_back.jpeg}
-    \caption[]{Izgled prototipa - PCB zadnja strana}
+    \caption{\textit{Izgled prototipa - PCB zadnja strana}}
     \label{fig:pcb_back}
 \end{figure}
 
@@ -246,7 +246,7 @@ Na slikama \ref{fig:pcb_front} i \ref{fig:pcb_back} se nalazi izgled printane ti
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{images/block_diagram_3_3.png}
-    \caption{Blok dijagram programskog rješenja}
+    \caption{\textit{Blok dijagram programskog rješenja}}
     \label{fig:block_diagram_3_3}
 \end{figure}
 
@@ -383,6 +383,6 @@ Odabrali smo drugu opciju jer je znatno jednostavnija.
     Motor je pokrenut & Uključen, ekran uključen & Aktivno stanje \\
     \hline
   \end{tabularx}
-  \caption{Tablica stanja auta}
+  \caption{\textit{Tablica stanja auta}}
   \label{tbl:car-states}
 \end{table}

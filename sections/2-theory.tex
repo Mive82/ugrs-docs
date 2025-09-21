@@ -1,5 +1,5 @@
 \newpage
-\section{Peugeot Infotainment sustav}\label{sec:van_bus}
+\section{PEUGEOT INFOTAINMENT SUSTAV}\label{sec:van_bus}
 
 \subsection{Principi i fizikalne zakonitosti}
 VAN (eng. \textit{Vehicle Area Network}) je serijska komunikacijska sabirnica koju su razvili PSA grupa (Peugeot, Citroën) i Renault kao alternativu CAN sabirnici. 
@@ -31,7 +31,7 @@ signala kraja podataka (\textbf{EOD}), signala potvrde (\textbf{ACK}) te signala
          &  & EXT & RAK & R/W & RTR &  &  &  &  & \\
         \hline
     \end{tabular}
-    \caption{Oblik VAN okvira}
+    \caption{\textit{Oblik VAN okvira}}
     \label{fig:van_frame_format}
 \end{table}
 
@@ -50,14 +50,14 @@ Budući da Manchester bit zahtjeva dva vremenska intervala za prijenos, četiri 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.75\textwidth]{images/mux1-eman.pdf}
-    \caption[]{e-Manchester kodiranje \cite{mux1}}
+    \caption[]{\textit{e-Manchester kodiranje \cite{mux1}}}
     \label{fig:manchester_bits_mux1}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=0.5\textwidth]{images/manchester_bits.pdf}
-    \caption{NRZ i Manchester bitovi. \cite{tss463c_datasheet}}
+    \caption{\textit{NRZ i Manchester bitovi. \cite{tss463c_datasheet}}}
     \label{fig:manchester_bits_tss463_docs}
 \end{figure}
 
@@ -73,7 +73,7 @@ Uređaj ili modul povezan na mrežu može biti jednog od tri tipa:
 \begin{figure}
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/ranking.pdf}
-    \caption{Vrste modula, \cite{tss463c_datasheet}}
+    \caption{\textit{Vrste modula, \cite{tss463c_datasheet}}}
   \end{center}
 \end{figure}
 
@@ -104,14 +104,14 @@ U slučaju da se potvrda ne traži, poruka se tretira kao poruka za emitiranje (
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/normalframe_ack.pdf}
-    \caption{Prijenos normalnog okvira s ACK, \cite{tss463c_datasheet}}
+    \caption{\textit{Prijenos normalnog okvira s ACK, \cite{tss463c_datasheet}}}
     \label{fig:normal_frame_ack}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/normalframe_noack.pdf}
-    \caption{Prijenos normalnog okvira bez ACK, \cite{tss463c_datasheet}}
+    \caption{\textit{Prijenos normalnog okvira bez ACK, \cite{tss463c_datasheet}}}
     \label{fig:normal_frame_noack}
 \end{figure}
 
@@ -126,7 +126,7 @@ Ostalo (RTR, podaci i kontrolnu sumu) generira modul koji odgovara.
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{images/immediate_reply.pdf}
-\caption{Ilustracija prijenosa zahtjeva s trenutačnim odgovorom, \cite{tss463c_datasheet}}
+\caption{\textit{Ilustracija prijenosa zahtjeva s trenutačnim odgovorom, \cite{tss463c_datasheet}}}
 \label{fig:immediate_reply_frame}
 \end{figure}
 
@@ -144,7 +144,7 @@ Naš infotainment sustav bit će spojen umjesto CD mjenjača, modul broj 8415 na
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/vannetwork.pdf}
-    \caption{Pregled VAN i CAN mreže u Peugeot 206 automobilu \cite{sedre}}
+    \caption{\textit{Pregled VAN i CAN mreže u Peugeot 206 automobilu \cite{sedre}}}
     \label{fig:van_can_network}
   \end{center}
 \end{figure}
@@ -154,7 +154,7 @@ Na slici \ref{fig:block_diagram_2_1} je prikazan block dijagram idejnog rješenj
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/block_diagram_2_1.pdf}
-    \caption{Block dijagram idejnog rješenja}
+    \caption{\textit{Block dijagram idejnog rješenja}}
     \label{fig:block_diagram_2_1}
   \end{center}
 \end{figure}
@@ -166,7 +166,7 @@ Na slici \ref{fig:block_diagram_2_2} se nalazi prikaz osnovnog sklopovskog dijag
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/block_diagram_2_2.png}
-    \caption{Osnovni blok dijagram sklopovskog rješenja}
+    \caption{\textit{Osnovni blok dijagram sklopovskog rješenja}}
     \label{fig:block_diagram_2_2}
   \end{center}
 \end{figure}
@@ -177,7 +177,7 @@ Na slici \ref{fig:block_diagram_2_3} je prikazan blok dijagram programskog rješ
 \begin{figure}[H]
   \begin{center}
     \includegraphics[width=0.75\textwidth]{images/block_diagram_2_3.png}
-    \caption{Osnovni blok dijagram programskog rješenja}
+    \caption{\textit{Osnovni blok dijagram programskog rješenja}}
     \label{fig:block_diagram_2_3}
   \end{center}
 \end{figure}
