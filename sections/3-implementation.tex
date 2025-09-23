@@ -257,7 +257,7 @@ upravljanje napajanjem također je važan dio programske podrške, budući da pr
 
 \subsubsection{Okvir i pristup}
 
-Kao program za razvoj koristimo ESP-IDF programski okvir koji pruža Espressif. 
+Kao program za razvoj koristi se ESP-IDF programski okvir koji pruža Espressif. 
 Okvir se temelji na operativnom sustavu FreeRTOS. Zbog prirode OS-a i programskog okruženja, programska podrška modula napisana je 
 koristeći pristup temeljen na događajima.
 
@@ -280,8 +280,7 @@ Budući da ESP32 ima dvije jezgre, jedna je posvećena isključivo primanju i an
 Za primanje VAN okvira potrebno je ručno čitati i vremenski pratiti stanja RX pina. 
 Srećom, ESP32 ima sklopovski periferni uređaj koji upravo to omogućuje: RMT periferni uređaj. 
 On može pratiti stanja GPIO pinova i mjeriti koliko dugo su u tom stanju. 
-Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, periferni uređaj može generirati prekid (eng. \textit{interrupt}) 
-svaki put kada detektira sekvencu \textbf{EOF}.
+Nakon što postavimo pragove za minimalnu i maksimalnu duljinu signala, periferni uređaj može generirati prekid (eng. \textit{interrupt}) svaki put kada detektira sekvencu \textbf{EOF}.
 
 \noindent
 Kada se detektira sekvenca \textbf{EOF}, RMT periferalni upravljački program generira prekid (eng. \textit{interrupt}). 
@@ -289,9 +288,9 @@ U okviru tog prekida, u red zadataka (eng. \textit{task queue}) modula za priman
 Modul za primanje VAN okvira preuzima primljene RMT podatke iz reda i analizira ih. 
 
 VAN okvir rekonstruiramo bit po bit iz tog polja, uzimajući u obzir Manchester bitove. 
-Nakon provjere kontrolnog zbroja (eng. \textit{checksum}), izdvajamo identifikator i podatke, 
-stavljamo ih u novi međuspremnik i postavljamo u red glavnog zadatka (eng. \textit{Main task}) za daljnju obradu. 
-Logika primanja inspirirana je Peter Pinterovom Arduino bibliotekom \cite{esp32_rmt_van} i prilagođena je arhitekturi naše programske podrške.
+Nakon provjere kontrolnog zbroja (eng. \textit{checksum}), izdvajaju se identifikator i podatci, 
+stavljaju se u novi međuspremnik i postavljaju u red glavnog zadatka (eng. \textit{Main task}) za daljnju obradu. 
+Logika primanja inspirirana je Peter Pinterovom Arduino bibliotekom \cite{esp32_rmt_van} i prilagođena je arhitekturi programske podrške.
 
 \subsubsection{Analiza VAN okvira}
 
@@ -302,9 +301,9 @@ Velika većina poznatih dekodiranih VAN okvira dostupna je na web stranici Peter
 
 \subsubsection{Slanje VAN okvira}
 
-Za slanje VAN okvira prema vozilu koristimo TSS463C. 
-TSS je zapravo dodatnih 128 bajtova RAM-a kojima moramo upravljati, budući da moramo kontrolirati svu memoriju korištenu za slanje i primanje podataka.
-Trenutačno se TSS koristi samo za slanje paketa CD izmjenjivača kako bismo ga mogli emulirati, te za slanje zahtjeva za resetiranje stanja putnog računala. 
+Za slanje VAN okvira prema vozilu se koristi TSS463C. 
+TSS je zapravo dodatnih 128 bajtova RAM-a kojima se mora upravljati, budući da se mora kontrolirati sva memorija korištena za slanje i primanje podataka.
+Trenutačno se TSS koristi samo za slanje paketa CD izmjenjivača kako bi se mogao emulirati, te za slanje zahtjeva za resetiranje stanja putnog računala. 
 Poruke CD mjenjača su poruke s neposrednim odgovorom (vidi \ref{subsec:message-types}), dok je zahtjev za resetiranje stanja putnog računala normalni okvir s zahtjevom za potvrdom (ACK). 
 Paketi CD mjenjača šalju se periodično, svake sekunde, inače će ugrađeni radio smatrati da CD mjenjača nije prisutan i onemogućiti ga.
 
@@ -346,8 +345,8 @@ Važno je upravljati potrošnjom energije sustava. Radi lakšeg upravljanja defi
 Pogledajte tablicu \ref{tbl:car-states} za popis tih stanja i ponašanje sustava. 
 Jedna važna komponenta spomenuta u tablici je stanje dubokog spavanja ESP32-a (eng. \textit{deep sleep}). 
 Kada je u dubokom snu, ESP je praktički isključen. Jedino što radi na čipu je posebni dio RAM-a, unutarnji RTC sklop i, po potrebi, ULP koprocesor. 
-U našem slučaju koristimo isti ADC pin koji se koristi za mjerenje napona baterije kako bismo probudili ESP. 
-Zbog naponskog raspona nožice, ne možemo koristiti jednostavno buđenje putem GPIO-a, već moramo koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
+U ovom slučaju slučaju korišten je isti ADC pin koji se koristi za mjerenje napona baterije kako bi se ESP probudio. 
+Zbog naponskog raspona nožice, ne može se koristiti jednostavno buđenje putem GPIO-a, već se mora koristiti ULP koprocesor za mjerenje napona i buđenje ESP-a kada napon prijeđe određeni prag.
 
 \subsubsection{ULP koprocesor}
 
@@ -355,7 +354,7 @@ ESP32 ima vrlo niskopotrošni koprocesor. Ima vrlo jednostavnu arhitekturu i tro
 Ne može se programirati izravno u C-u, ali postoje dva načina pisanja koda. 
 Prvi način je pisanje asembler koda u zasebnoj datoteci i njegovo integriranje u datoteku firmwarea. 
 Drugi način je korištenje unaprijed definiranih C makroa i pisanje programa u polju unutar C programa te njegovo učitavanje na taj način. 
-Odabrali smo drugu opciju jer je znatno jednostavnija.
+Odabrana je druga opcija jer je znatno jednostavnija.
 
 \begin{table}[H]
   \caption{\textit{Tablica stanja auta.}}

@@ -6,13 +6,12 @@ VAN (eng. \textit{Vehicle Area Network}) je serijska komunikacijska sabirnica ko
 Definirana je u ISO standardu \textbf{ISO 11519-3}. 
 Koristi isti fizički sloj kao CAN sabirnica (diferencijalni par) i identičnu metodu arbitraže na sabirnici, 
 ali se razlikuje u načinu pakiranja podataka.
-Gotovo sve informacije navedene ovdje preuzete su iz Atmel TSS463C dokumentacije \cite{tss463c_datasheet}.
+Gotovo sve informacije navedene preuzete su iz Atmel TSS463C dokumentacije \cite{tss463c_datasheet}.
 
 \bigskip
 \noindent
 Kao i CAN, VAN protokol koristi identifikatore za razlikovanje poruka i izvođenje arbitraže na sabirnici. 
-Dodatno, omogućuje tzv. „odgovore unutar okvira” (eng. \textit{In-frame}), veće veličine poruka (28 bajtova umjesto 8 bajtova kao u CAN-u) 
-te mogućnost izravne komunikacije s drugim uređajem.
+Dodatno, omogućuje tzv. „odgovore unutar okvira” (eng. \textit{In-frame}), veće veličine poruka (28 bajtova umjesto 8 bajtova kao u CAN-u) te mogućnost izravne komunikacije s drugim uređajem.
 
 \bigskip
 \noindent
@@ -90,7 +89,7 @@ VAN protokol podržava više tipova poruka. Razlikuju se s pomoću polja identif
 \subsubsection{Vrste poruka}
 \label{subsec:message-types}
 
-Ovdje ćemo navesti tipove okvira relevantne za ovaj projekt. Postoje i drugi, ali koristimo samo ove.
+Ovdje će biti navedeni tipvi okvira relevantni za ovaj projekt. Postoje i drugi, ali koriste samo ovi.
 
 \smallskip
 \noindent
@@ -132,14 +131,14 @@ Ostalo (RTR, podaci i kontrolnu sumu) generira modul koji odgovara.
 
 \subsubsection{VAN mreža}
 
-Više modula možemo povezati zajedno kako bismo stvorili mrežu. 
+Više modula se mogu povezati zajedno kako bi se stvorila mreža. 
 Također je moguće povezati više mreža i koristiti pristupni modul (eng. \textit{gateway}) za usmjeravanje podataka između mreža. 
-U vozilu Peugeot 206 imamo jednu CAN mrežu \emph{CAN Engine} i tri VAN mreže: \emph{VAN Comfort}, \emph{VAN Body 1} i \emph{VAN Body 2}.
+U vozilu Peugeot 206 postoji jedna CAN mreža \emph{CAN Engine} i tri VAN mreže: \emph{VAN Comfort}, \emph{VAN Body 1} i \emph{VAN Body 2}.
 
 \noindent
-Raspored mreža prikazan je na slici \ref{fig:van_can_network}. Tamo također možemo vidjeti pristupni modul, BSI. Ovaj modul prisutan je u svim vozilima PSA grupe. 
+Raspored mreža prikazan je na slici \ref{fig:van_can_network}. Tamo također se može vidjeti pristupni modul, BSI. Ovaj modul prisutan je u svim vozilima PSA grupe. 
 Konkretni BSI dolazi iz generacije AEE2001, jedine generacije koja koristi VAN sabirnicu. Druge generacije, AEE2004 i AEE2010, koriste isključivo CAN.
-Naš infotainment sustav bit će spojen umjesto CD mjenjača, modul broj 8415 na slici \ref{fig:van_can_network} na \emph{VAN Comfort} sabirnici.
+Ovaj infotainment sustav bit će spojen umjesto CD mjenjača, modul broj 8415 na slici \ref{fig:van_can_network} na \emph{VAN Comfort} sabirnici.
 
 \begin{figure}[H]
   \begin{center}
@@ -172,7 +171,7 @@ Na slici \ref{fig:block_diagram_2_2} se nalazi prikaz osnovnog sklopovskog dijag
 \end{figure}
 
 \subsection{Prijedlog programskog rješenja}
-Na slici \ref{fig:block_diagram_2_3} je prikazan blok dijagram programskog rješenja koji daje apstraktan uvid u moguće programsko rješenje. Glavni program bi se vrtio na mikroupravljaču ESP32 koji je odgovaran za slanje i primanje paketa na VAN mreži tj. odgovaran je za komunikaciju s računalom automobila. Nadalje, pored toga je potrebno riješiti problem upravljanja potrošnjom energije i uvjetnog paljenja sustava tj. postavljanjem dijelova sustava u aktivno stanje ili stanje mirovanja. I na kraju je potrebno dobivene informacije obraditi te prikazati na ekranu.
+Na slici \ref{fig:block_diagram_2_3} je prikazan blok dijagram programskog rješenja koji daje apstraktan uvid u moguće programsko rješenje. Glavni program bi se vrtio na mikroupravljaču je odgovaran za slanje i primanje paketa na VAN mreži tj. odgovaran je za komunikaciju s računalom automobila. Nadalje, pored toga je potrebno riješiti problem upravljanja potrošnjom energije i uvjetnog paljenja sustava tj. postavljanjem dijelova sustava u aktivno stanje ili stanje mirovanja. I na kraju je potrebno dobivene informacije obraditi te prikazati na ekranu.
 
 \begin{figure}[H]
   \begin{center}
